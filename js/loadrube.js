@@ -152,7 +152,9 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
             jd.enableMotor = jointJso.enableMotor;
         joint = world.CreateJoint(jd);
     }
-    else if ( jointJso.type == "distance" ) {
+    else if ( jointJso.type == "distance" || jointJso.type == "rope" ) {
+        if ( jointJso.type == "rope" )
+            console.log("Replacing unsupported rope joint with distance joint!");
         var jd = new b2DistanceJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
         if ( jointJso.hasOwnProperty('length') )
@@ -203,6 +205,22 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
         if ( jointJso.hasOwnProperty('localAxisA') )
             jd.localAxisA.SetV( getVectorValue(jointJso.localAxisA) );
             
+        joint = world.CreateJoint(jd);
+    }
+    else if ( jointJso.type == "friction" ) {
+        var jd = new b2FrictionJointDef();
+        loadJointCommonProperties(jd, jointJso, loadedBodies);
+        if ( jointJso.hasOwnProperty('maxForce') )
+            jd.maxForce = jointJso.maxForce;
+        if ( jointJso.hasOwnProperty('maxTorque') )
+            jd.maxTorque = jointJso.maxTorque;
+        joint = world.CreateJoint(jd);
+    }
+    else if ( jointJso.type == "weld" ) {
+        var jd = new b2WeldJointDef();
+        loadJointCommonProperties(jd, jointJso, loadedBodies);
+        if ( jointJso.hasOwnProperty('referenceAngle') )
+            jd.referenceAngle = jointJso.referenceAngle;
         joint = world.CreateJoint(jd);
     }
     else {
@@ -270,8 +288,8 @@ function loadSceneIntoWorld(worldJso, world) {
             var joint = loadJointFromRUBE(jointJso, world, loadedBodies);
             if ( joint )
                 loadedJoints.push( joint );
-            else
-                success = false;
+            //else
+            //    success = false;
         }
     }
     
