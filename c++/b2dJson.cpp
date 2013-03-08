@@ -415,6 +415,19 @@ Json::Value b2dJson::b2j(b2Joint* joint)
             floatToJson("springDampingRatio", wheelJoint->GetSpringDampingRatio(), jointValue);
         }
         break;
+    case e_motorJoint:
+        {
+            jointValue["type"] = "motor";
+
+            b2MotorJoint* motorJoint = (b2MotorJoint*)joint;
+            vecToJson("anchorA", bodyA->GetLocalPoint(motorJoint->GetAnchorA()), jointValue);
+            vecToJson("anchorB", bodyB->GetLocalPoint(motorJoint->GetAnchorB()), jointValue);
+            floatToJson("refAngle", motorJoint->GetAngularOffset(), jointValue);
+            floatToJson("maxForce", motorJoint->GetMaxForce(), jointValue);
+            floatToJson("maxTorque", motorJoint->GetMaxTorque(), jointValue);
+            //floatToJson("correctionFactor", motorJoint->GetCorrectionFactor(), jointValue);
+        }
+        break;
     case e_weldJoint:
         {
             jointValue["type"] = "weld";
@@ -423,6 +436,8 @@ Json::Value b2dJson::b2j(b2Joint* joint)
             vecToJson("anchorA", bodyA->GetLocalPoint(weldJoint->GetAnchorA()), jointValue);
             vecToJson("anchorB", bodyB->GetLocalPoint(weldJoint->GetAnchorB()), jointValue);
             floatToJson("refAngle", weldJoint->GetReferenceAngle(), jointValue);
+            floatToJson("frequency", weldJoint->GetFrequency(), jointValue);
+            floatToJson("dampingRatio", weldJoint->GetDampingRatio(), jointValue);
         }
         break;
     case e_frictionJoint:
@@ -1114,7 +1129,7 @@ b2Fixture* b2dJson::j2b2Fixture(b2Body* body, Json::Value fixtureValue)
     else if ( !fixtureValue["polygon"].isNull() ) {
         b2Vec2 vertices[b2_maxPolygonVertices];
         int numVertices = fixtureValue["polygon"]["vertices"]["x"].size();
-        if ( numVertices >= b2_maxPolygonVertices ) {
+        if ( numVertices > b2_maxPolygonVertices ) {
             std::cout << "Ignoring polygon fixture with too many vertices.\n";
         }
         else if ( numVertices < 2 ) {
@@ -1163,6 +1178,7 @@ b2Joint* b2dJson::j2b2Joint(b2World* world, Json::Value jointValue)
     b2MouseJointDef mouseDef;
     b2GearJointDef gearDef;
     b2WheelJointDef wheelDef;
+    b2MotorJointDef motorDef;
     b2WeldJointDef weldDef;
     b2FrictionJointDef frictionDef;
     b2RopeJointDef ropeDef;
@@ -1252,12 +1268,23 @@ b2Joint* b2dJson::j2b2Joint(b2World* world, Json::Value jointValue)
         wheelDef.frequencyHz = jsonToFloat("springFrequency", jointValue);
         wheelDef.dampingRatio = jsonToFloat("springDampingRatio", jointValue);
     }
+    else if ( type == "motor" )
+    {
+        jointDef = &motorDef;
+        motorDef.linearOffset = jsonToVec("anchorA", jointValue);//editor uses anchorA as the linear offset
+        motorDef.angularOffset = jsonToFloat("refAngle", jointValue);
+        motorDef.maxForce = jsonToFloat("maxForce", jointValue);
+        motorDef.maxTorque = jsonToFloat("maxTorque", jointValue);
+        motorDef.correctionFactor = jsonToFloat("correctionFactor", jointValue);
+    }
     else if ( type == "weld" )
     {
         jointDef = &weldDef;
         weldDef.localAnchorA = jsonToVec("anchorA", jointValue);
         weldDef.localAnchorB = jsonToVec("anchorB", jointValue);
-        weldDef.referenceAngle = 0;//jsonToFloat("refAngle", jointValue);
+        weldDef.referenceAngle = jsonToFloat("refAngle", jointValue);
+        weldDef.frequencyHz = jsonToFloat("frequency", jointValue);
+        weldDef.dampingRatio = jsonToFloat("dampingRatio", jointValue);
     }
     else if ( type == "friction" )
     {
