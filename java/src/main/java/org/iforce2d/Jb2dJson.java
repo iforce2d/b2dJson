@@ -562,16 +562,16 @@ public class Jb2dJson {
 		case ROPE: {
 			// Rope joints are apparently not implemented in JBox2D yet, but
 			// when they are, commenting out the following section should work.
-			/*
-			 * jointValue.put("type", "rope");
-			 * 
-			 * RopeJoint ropeJoint = (RopeJoint)joint;
-			 * ropeJoint.getAnchorA(tmpAnchor); vecToJson("anchorA",
-			 * bodyA.getLocalPoint(tmpAnchor), jointValue);
-			 * ropeJoint.getAnchorB(tmpAnchor); vecToJson("anchorB",
-			 * bodyB.getLocalPoint(tmpAnchor), jointValue);
-			 * floatToJson("maxLength", ropeJoint.getMaxLength(), jointValue);
-			 */
+			
+			jointValue.put("type", "rope");
+			 
+			RopeJoint ropeJoint = (RopeJoint)joint;
+			ropeJoint.getAnchorA(tmpAnchor); vecToJson("anchorA",
+			bodyA.getLocalPoint(tmpAnchor), jointValue);
+			ropeJoint.getAnchorB(tmpAnchor); vecToJson("anchorB",
+			bodyB.getLocalPoint(tmpAnchor), jointValue);
+			floatToJson("maxLength", ropeJoint.getMaxLength(), jointValue);
+			 
 		}
 			break;
 		case UNKNOWN:
@@ -1056,7 +1056,7 @@ public class Jb2dJson {
 		// WheelJointDef wheelDef;
 		WeldJointDef weldDef;
 		FrictionJointDef frictionDef;
-		// RopeJointDef ropeDef;
+		RopeJointDef ropeDef;
 
 		// will be used to select one of the above to work with
 		JointDef jointDef = null;
@@ -1108,9 +1108,7 @@ public class Jb2dJson {
 		} else if (type.equals("mouse")) {
 			jointDef = mouseDef = new MouseJointDef();
 			mouseJointTarget = jsonToVec("target", jointValue);
-			mouseDef.target.set(jsonToVec("anchorB", jointValue));// alter after
-																	// creating
-																	// joint
+			mouseDef.target.set(jsonToVec("anchorB", jointValue));// alter after creating joint
 			mouseDef.maxForce = jsonToFloat("maxForce", jointValue);
 			mouseDef.frequencyHz = jsonToFloat("frequency", jointValue);
 			mouseDef.dampingRatio = jsonToFloat("dampingRatio", jointValue);
@@ -1158,16 +1156,13 @@ public class Jb2dJson {
 			frictionDef.localAnchorB.set(jsonToVec("anchorB", jointValue));
 			frictionDef.maxForce = jsonToFloat("maxForce", jointValue);
 			frictionDef.maxTorque = jsonToFloat("maxTorque", jointValue);
+		} else if ( type.equals("rope") ) { 
+			jointDef = ropeDef = new RopeJointDef(); 
+			ropeDef.localAnchorA.set( jsonToVec("anchorA", jointValue) ); 
+			ropeDef.localAnchorB.set( jsonToVec("anchorB", jointValue) ); 
+			ropeDef.maxLength = jsonToFloat("maxLength", jointValue); 
 		}
-		// Rope joints are apparently not implemented in JBox2D yet, but
-		// when they are, commenting out the following section should work.
-		/*
-		 * else if ( type.equals("rope") ) { jointDef = ropeDef = new
-		 * RopeJointDef(); ropeDef.localAnchorA.set( jsonToVec("anchorA",
-		 * jointValue) ); ropeDef.localAnchorB.set( jsonToVec("anchorB",
-		 * jointValue) ); ropeDef.maxLength = jsonToFloat("maxLength",
-		 * jointValue); }
-		 */
+		 
 
 		if (null != jointDef) {
 			// set features common to all joints
