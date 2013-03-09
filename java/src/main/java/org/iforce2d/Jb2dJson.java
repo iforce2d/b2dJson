@@ -607,6 +607,20 @@ public class Jb2dJson {
 		floatToJson("opacity", image.opacity, imageValue);
 		imageValue.put("filter", image.filter);
 		floatToJson("renderOrder", image.renderOrder, imageValue);
+		
+	    boolean defaultColorTint = true;
+	    for (int i = 0; i < 4; i++) {
+	        if ( image.colorTint[i] != 255 ) {
+	            defaultColorTint = false;
+	            break;
+	        }
+	    }
+
+	    if ( !defaultColorTint ) {
+	    	JSONArray array = imageValue.getJSONArray("colorTint");
+	        for (int i = 0; i < 4; i++)
+	        	array.put(i, image.colorTint[i]);	        
+	    }
 
 		// image->updateCorners();
 		for (int i = 0; i < 4; i++)
@@ -1207,6 +1221,13 @@ public class Jb2dJson {
 		img.opacity = jsonToFloat("opacity", imageValue);
 		img.renderOrder = jsonToFloat("renderOrder", imageValue);
 
+	    JSONArray colorTintArray = imageValue.optJSONArray("colorTint");
+	    if ( null != colorTintArray ) {
+	        for (int i = 0; i < 4; i++) {
+	            img.colorTint[i] = colorTintArray.getInt(i);
+	        }
+	    }
+		
 		img.flip = imageValue.optBoolean("flip", false);
 
 		img.filter = imageValue.optInt("filter", 1);

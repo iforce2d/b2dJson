@@ -74,6 +74,8 @@ b2dJsonImage::b2dJsonImage()
     filter = FT_LINEAR;
     opacity = 1;
     renderOrder = 0;
+    for (int i = 0; i < 4; i++)
+        colorTint[i] = 255;
 
     numPoints = 0;
     points = NULL;
@@ -101,8 +103,10 @@ b2dJsonImage::b2dJsonImage(const b2dJsonImage *other)
     filter = other->filter;
     opacity = other->opacity;
     renderOrder = other->renderOrder;
+    for (int i = 0; i < 4; i++)
+        colorTint[i] = other->colorTint[i];
 
-    memcpy(m_corners, other->m_corners, 4 * sizeof(b2Vec2));
+    memcpy(corners, other->corners, 4 * sizeof(b2Vec2));
 
     numPoints = other->numPoints;
     points = new float[2 * numPoints];
@@ -119,10 +123,10 @@ void b2dJsonImage::updateCorners(float aspect)
     float hx = 0.5 * aspect;
     float hy = 0.5;
 
-    m_corners[0].Set(-hx, -hy);
-    m_corners[1].Set( hx, -hy);
-    m_corners[2].Set( hx,  hy);
-    m_corners[3].Set(-hx,  hy);
+    corners[0].Set(-hx, -hy);
+    corners[1].Set( hx, -hy);
+    corners[2].Set( hx,  hy);
+    corners[3].Set(-hx,  hy);
 
     b2Mat33 r, s;
     _setMat33Rotation(r, angle);
@@ -130,8 +134,8 @@ void b2dJsonImage::updateCorners(float aspect)
     b2Mat33 m = _b2Mul(r,s);
 
     for (int i = 0; i < 4; i++) {
-        m_corners[i] = _b2Mul(m, m_corners[i]);
-        m_corners[i] += center;
+        corners[i] = _b2Mul(m, corners[i]);
+        corners[i] += center;
     }
 }
 
@@ -208,8 +212,8 @@ b2AABB b2dJsonImage::getAABB()
     aabb.lowerBound.Set(FLT_MAX, FLT_MAX);
     aabb.upperBound.Set(-FLT_MAX, -FLT_MAX);
     for (int i = 0; i < 4; i++) {
-        aabb.lowerBound = b2Min(aabb.lowerBound, _b2Mul(m, m_corners[i]));
-        aabb.upperBound = b2Max(aabb.upperBound, _b2Mul(m, m_corners[i]));
+        aabb.lowerBound = b2Min(aabb.lowerBound, _b2Mul(m, corners[i]));
+        aabb.upperBound = b2Max(aabb.upperBound, _b2Mul(m, corners[i]));
     }
     return aabb;
 }

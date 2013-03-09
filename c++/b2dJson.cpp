@@ -496,9 +496,22 @@ Json::Value b2dJson::b2j(b2dJsonImage *image)
     imageValue["filter"] = image->filter;
     floatToJson("renderOrder", image->renderOrder, imageValue );
 
+    bool defaultColorTint = true;
+    for (int i = 0; i < 4; i++) {
+        if ( image->colorTint[i] != 255 ) {
+            defaultColorTint = false;
+            break;
+        }
+    }
+
+    if ( !defaultColorTint ) {
+        for (int i = 0; i < 4; i++)
+            imageValue["colorTint"][i] = image->colorTint[i];
+    }
+
     //image->updateCorners();
     for (int i = 0; i < 4; i++)
-        vecToJson("corners", image->m_corners[i], imageValue, i);
+        vecToJson("corners", image->corners[i], imageValue, i);
 
     //image->updateUVs();
     for (int i = 0; i < 2*image->numPoints; i++) {
@@ -1343,6 +1356,13 @@ b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value imageValue)
     img->opacity = jsonToFloat("opacity", imageValue);
     img->renderOrder = jsonToFloat("renderOrder", imageValue);
 
+    if ( imageValue.isMember("colorTint") ) {
+        for (int i = 0; i < 4; i++) {
+            if ( imageValue["colorTint"][i].isInt() )
+                img->colorTint[i] = imageValue["colorTint"][i].asInt();
+        }
+    }
+
     if ( imageValue["flip"].isBool() )
         img->flip = imageValue["flip"].asBool();
 
@@ -1350,7 +1370,7 @@ b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value imageValue)
         img->filter = imageValue["filter"].asInt();
 
     for (int i = 0; i < 4; i++)
-        img->m_corners[i] = jsonToVec("corners", imageValue, i);
+        img->corners[i] = jsonToVec("corners", imageValue, i);
 
     if ( imageValue["glVertexPointer"].isArray() && imageValue["glTexCoordPointer"].isArray() &&
          (imageValue["glVertexPointer"].size()  ==  imageValue["glTexCoordPointer"].size()) ) {

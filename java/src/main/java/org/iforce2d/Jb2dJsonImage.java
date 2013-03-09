@@ -52,6 +52,7 @@ public class Jb2dJsonImage {
     float opacity;
     int filter; // 0 = nearest, 1 = linear
     float renderOrder;
+    int colorTint[];
 
     Vec2 corners[];
 
@@ -61,5 +62,9 @@ public class Jb2dJsonImage {
     int numIndices;
     short indices[];
 
+    public Jb2dJsonImage() {
+    	colorTint = new int[4];
+    }
+    
 }
 

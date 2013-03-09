@@ -42,8 +42,9 @@ public:
     float opacity;
     int filter; // 0 = nearest, 1 = linear
     float renderOrder;
+    int colorTint[4];
 
-    b2Vec2 m_corners[4];
+    b2Vec2 corners[4];
 
     int numPoints;
     float* points;

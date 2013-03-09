@@ -87,8 +87,14 @@ void b2dJsonImage_OpenGL::render()
     glEnable(GL_BLEND);
 
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    //glColor4f(1,1,1,opacity); //this will use opacity as defined in RUBE
-    glColor3f(1,1,1);
+
+    float useRed = colorTint[0] / 255.0f;
+    float useGreen = colorTint[1] / 255.0f;
+    float useBlue = colorTint[2] / 255.0f;
+    float useAlpha = colorTint[3] / 255.0f;
+    useAlpha *= opacity; //this will use opacity as defined in RUBE
+
+    glColor4f(useRed,useGreen,useBlue,useAlpha);
 
     glPushMatrix();
 
@@ -116,13 +122,13 @@ void b2dJsonImage_OpenGL::renderUsingCorners()
 
     glBegin(GL_TRIANGLE_FAN);
     glTexCoord2f(lx,0);
-    glVertex2f(m_corners[0].x, m_corners[0].y);
+    glVertex2f(corners[0].x, corners[0].y);
     glTexCoord2f(ux,0);
-    glVertex2f(m_corners[1].x, m_corners[1].y);
+    glVertex2f(corners[1].x, corners[1].y);
     glTexCoord2f(ux,1);
-    glVertex2f(m_corners[2].x, m_corners[2].y);
+    glVertex2f(corners[2].x, corners[2].y);
     glTexCoord2f(lx,1);
-    glVertex2f(m_corners[3].x, m_corners[3].y);
+    glVertex2f(corners[3].x, corners[3].y);
     glEnd();
 }
 
