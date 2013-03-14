@@ -23,7 +23,7 @@
 #include <map>
 #include <set>
 #include <string>
-#include <Box2D/Box2D.h>
+#include <Box2D.h>
 #include "json/json.h"
 
 class b2dJsonImage;
