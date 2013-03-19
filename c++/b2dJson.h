@@ -93,17 +93,29 @@ public:
     void setImageName(b2dJsonImage* image, const char* name);
 
     void addImage(b2dJsonImage* image);
+    
+    //Json::Value extraction functions
+    Json::Value parseValueFromString(std::string str, std::string& errorMsg);
+    Json::Value parseValueFromFile(const char* filename, std::string& errorMsg);
 
     //reading functions
     b2World* readFromValue(Json::Value worldValue);
     b2World* readFromString(std::string str, std::string& errorMsg);
     b2World* readFromFile(const char* filename, std::string& errorMsg);
+    
+    //reading into existing world functions
+    void readIntoWorldFromValue(b2World *world, Json::Value worldValue);
+    void readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg);
+    void readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg);
 
     b2World* j2b2World(Json::Value worldValue);
     b2Body* j2b2Body(b2World* world, Json::Value bodyValue);
     b2Fixture* j2b2Fixture(b2Body* body, Json::Value fixtureValue);
     b2Joint* j2b2Joint(b2World* world, Json::Value jointValue);
     b2dJsonImage* j2b2dJsonImage(Json::Value imageValue);
+    
+    //function copies json world into existing world
+    void j2Intob2World(b2World *world, Json::Value worldValue);
 
     int getBodiesByName(std::string name, std::vector<b2Body*>& bodies);
     int getFixturesByName(std::string name, std::vector<b2Fixture*>& fixtures);
