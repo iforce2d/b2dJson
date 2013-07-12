@@ -958,7 +958,7 @@ void b2dJson::readIntoWorldFromValue(b2World *world, Json::Value worldValue)
 void b2dJson::readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg)
 {
     Json::Value worldValue = parseValueFromString(str, errorMsg);
-    if (worldValue == NULL) return NULL;
+    if (worldValue == NULL) return;
     
     j2Intob2World(world, worldValue);
 }
@@ -966,7 +966,7 @@ void b2dJson::readIntoWorldFromString(b2World *world, std::string str, std::stri
 void b2dJson::readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg)
 {
     Json::Value worldValue = parseValueFromFile(filename, errorMsg);
-    if (worldValue == NULL) return NULL;
+    if (worldValue == NULL) return;
     
     j2Intob2World(world, worldValue);
 }
