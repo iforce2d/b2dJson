@@ -602,6 +602,7 @@ public class Jb2dJson {
 		vecToJson("center", image.center, imageValue);
 		floatToJson("angle", image.angle, imageValue);
 		floatToJson("scale", image.scale, imageValue);
+                floatToJson("aspectScale", image.aspectScale, imageValue);
 		if (image.flip)
 			imageValue.put("flip", true);
 		floatToJson("opacity", image.opacity, imageValue);
@@ -1218,6 +1219,7 @@ public class Jb2dJson {
 		img.center = jsonToVec("center", imageValue);
 		img.angle = jsonToFloat("angle", imageValue);
 		img.scale = jsonToFloat("scale", imageValue);
+                img.aspectScale = jsonToFloat("aspectScale", imageValue);
 		img.opacity = jsonToFloat("opacity", imageValue);
 		img.renderOrder = jsonToFloat("renderOrder", imageValue);
 

@@ -38,6 +38,7 @@ public:
     b2Vec2 center;
     float angle;
     float scale;
+    float aspectScale;
     bool flip;
     float opacity;
     int filter; // 0 = nearest, 1 = linear

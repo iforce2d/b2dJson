@@ -490,6 +490,7 @@ Json::Value b2dJson::b2j(b2dJsonImage *image)
     vecToJson("center", image->center, imageValue);
     floatToJson("angle", image->angle, imageValue );
     floatToJson("scale", image->scale, imageValue );
+    floatToJson("aspectScale", image->aspectScale, imageValue );
     if ( image->flip )
         imageValue["flip"] = true;
     floatToJson("opacity", image->opacity, imageValue );
@@ -577,12 +578,14 @@ void b2dJson::setCustomFloat(void* item, string propertyName, float val)    { ge
 void b2dJson::setCustomString(void* item, string propertyName, string val)  { getCustomPropertiesForItem(item, true)->m_customPropertyMap_string[propertyName] = val; }
 void b2dJson::setCustomVector(void* item, string propertyName, b2Vec2 val)  { getCustomPropertiesForItem(item, true)->m_customPropertyMap_b2Vec2[propertyName] = val; }
 void b2dJson::setCustomBool(void* item, string propertyName, bool val)      { getCustomPropertiesForItem(item, true)->m_customPropertyMap_bool[propertyName] = val; }
+void b2dJson::setCustomColor(void* item, string propertyName, b2dJsonColor4 val)    { getCustomPropertiesForItem(item, true)->m_customPropertyMap_color[propertyName] = val; }
 
 bool b2dJson::hasCustomInt(void *item, string propertyName)     { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_int.count(propertyName) > 0; }
 bool b2dJson::hasCustomFloat(void *item, string propertyName)   { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_float.count(propertyName) > 0; }
 bool b2dJson::hasCustomString(void *item, string propertyName)  { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_string.count(propertyName) > 0; }
 bool b2dJson::hasCustomVector(void *item, string propertyName)  { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_b2Vec2.count(propertyName) > 0; }
 bool b2dJson::hasCustomBool(void *item, string propertyName)    { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_bool.count(propertyName) > 0; }
+bool b2dJson::hasCustomColor(void *item, string propertyName)   { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_color.count(propertyName) > 0; }
 
 int b2dJson::getCustomInt(void *item, string propertyName, int defaultVal)
 {
@@ -635,6 +638,17 @@ bool b2dJson::getCustomBool(void *item, string propertyName, bool defaultVal)
         return defaultVal;
     std::map<string,bool>::iterator it = props->m_customPropertyMap_bool.find(propertyName);
     if ( it != props->m_customPropertyMap_bool.end() )
+        return it->second;
+    return defaultVal;
+}
+
+b2dJsonColor4 b2dJson::getCustomColor(void *item, string propertyName, b2dJsonColor4 defaultVal)
+{
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    if ( !props )
+        return defaultVal;
+    std::map<string,b2dJsonColor4>::iterator it = props->m_customPropertyMap_color.find(propertyName);
+    if ( it != props->m_customPropertyMap_color.end() )
         return it->second;
     return defaultVal;
 }
@@ -738,15 +752,33 @@ Json::Value b2dJson::writeCustomPropertiesToJson(void* item)
     }
 
     FILL_CUSTOM_PROPERTY_JSON_VALUE(int,int)
-    FILL_CUSTOM_PROPERTY_JSON_VALUE(float,float)
+    //FILL_CUSTOM_PROPERTY_JSON_VALUE(float,float) handled separately below
     FILL_CUSTOM_PROPERTY_JSON_VALUE(string,string)
     //FILL_CUSTOM_PROPERTY_JSON_VALUE(vec2,b2Vec2) handled separately below
     FILL_CUSTOM_PROPERTY_JSON_VALUE(bool,bool)
+
+    for (std::map<string,float>::iterator it = props->m_customPropertyMap_float.begin(); it != props->m_customPropertyMap_float.end(); ++it) {
+        Json::Value propValue;
+        propValue["name"] = it->first;
+        floatToJson("float", it->second, propValue);
+        customPropertiesValue[i++] = propValue;
+    }
 
     for (std::map<string,b2Vec2>::iterator it = props->m_customPropertyMap_b2Vec2.begin(); it != props->m_customPropertyMap_b2Vec2.end(); ++it) {
         Json::Value propValue;
         propValue["name"] = it->first;
         vecToJson("vec2", it->second, propValue);
+        customPropertiesValue[i++] = propValue;
+    }
+
+    for (std::map<string,b2dJsonColor4>::iterator it = props->m_customPropertyMap_color.begin(); it != props->m_customPropertyMap_color.end(); ++it) {
+        Json::Value propValue;
+        propValue["name"] = it->first;
+        //vecToJson("color", it->second, propValue);
+        propValue["color"][0] = it->second.r;
+        propValue["color"][1] = it->second.g;
+        propValue["color"][2] = it->second.b;
+        propValue["color"][3] = it->second.a;
         customPropertiesValue[i++] = propValue;
     }
 
@@ -771,7 +803,7 @@ void b2dJson::readCustomPropertiesFromJson(b2Type* item, Json::Value value)\
             setCustomInt(item, propertyName, val);\
         }\
         if ( propValue.isMember("float") ) {\
-            float val = propValue.get("float", 0).asFloat();\
+            float val = jsonToFloat("float", propValue);\
             setCustomFloat(item, propertyName, val);\
         }\
         if ( propValue.isMember("string") ) {\
@@ -906,73 +938,70 @@ void b2dJson::clear()
 }
 
 
-Json::Value b2dJson::parseValueFromString(std::string str, std::string& errorMsg)
+bool b2dJson::parseValueFromString(std::string str, Json::Value& value, std::string& errorMsg)
 {
-    Json::Value worldValue;
     Json::Reader reader;
-    if ( ! reader.parse(str, worldValue) )
+    if ( ! reader.parse(str, value) )
     {
-        //std::cout  << "Failed to parse string\n" << reader.getFormattedErrorMessages();
         errorMsg = string("Failed to parse JSON:\n") + reader.getFormatedErrorMessages();
-        return NULL;
+        return false;
     }
     
-    return worldValue;
+    return true;
 }
 
-Json::Value b2dJson::parseValueFromFile(const char* filename, std::string& errorMsg)
+bool b2dJson::parseValueFromFile(const char* filename, Json::Value& value, std::string& errorMsg)
 {
     if (!filename)
-        return NULL;
+        return false;
     
     std::ifstream ifs;
     ifs.open(filename, std::ios::in);
     if (!ifs) {
-        //std::cout << "Could not open file " << filename << " for reading\n";
         errorMsg = string("Could not open file '") + string(filename) + string("' for reading");
-        return NULL;
+        return false;
     }
     
-    Json::Value worldValue;
     Json::Reader reader;
-    if ( ! reader.parse(ifs, worldValue) )
+    if ( ! reader.parse(ifs, value) )
     {
-        //std::cout  << "Failed to parse " << filename << std::endl << reader.getFormattedErrorMessages();
         errorMsg = string("Failed to parse '") + string(filename) + string("' : ") + reader.getFormatedErrorMessages();
         ifs.close();
-        return NULL;
+        return false;
     }
     ifs.close();
     
-    return worldValue;
+    return true;
 }
 
 
-void b2dJson::readIntoWorldFromValue(b2World *world, Json::Value worldValue)
+bool b2dJson::readIntoWorldFromValue(b2World *world, Json::Value &worldValue)
 {
     clear();
     
-    j2Intob2World(world, worldValue);
+    return j2Intob2World(world, worldValue);
 }
 
-void b2dJson::readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg)
+bool b2dJson::readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg)
 {
-    Json::Value worldValue = parseValueFromString(str, errorMsg);
-    if (worldValue == NULL) return;
+    Json::Value worldValue;
+    if ( ! parseValueFromString(str, worldValue, errorMsg) )
+        return false;
     
-    j2Intob2World(world, worldValue);
+    return j2Intob2World(world, worldValue);
 }
 
-void b2dJson::readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg)
+bool b2dJson::readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg)
 {
-    Json::Value worldValue = parseValueFromFile(filename, errorMsg);
-    if (worldValue == NULL) return;
+    Json::Value worldValue;
+    if ( ! parseValueFromFile(filename, worldValue, errorMsg) )
+        return false;
     
-    j2Intob2World(world, worldValue);
+    return j2Intob2World(world, worldValue);
 }
 
 
-b2World *b2dJson::readFromValue(Json::Value worldValue)
+b2World *b2dJson::readFromValue(Json::Value &worldValue)
 {
     clear();
 
@@ -981,22 +1010,24 @@ b2World *b2dJson::readFromValue(Json::Value worldValue)
 
 b2World* b2dJson::readFromString(std::string str, std::string& errorMsg)
 {
-    Json::Value worldValue = parseValueFromString(str, errorMsg);
-    if (worldValue == NULL) return NULL;
+    Json::Value worldValue;
+    if ( ! parseValueFromString(str, worldValue, errorMsg) )
+        return NULL;
 
     return j2b2World(worldValue);
 }
 
 b2World* b2dJson::readFromFile(const char* filename, std::string& errorMsg)
 {
-    Json::Value worldValue = parseValueFromFile(filename, errorMsg);
-    if (worldValue == NULL) return NULL;
+    Json::Value worldValue;
+    if (! parseValueFromFile(filename, worldValue, errorMsg) )
+        return NULL;
 
     return j2b2World(worldValue);
 }
 
 
-b2World* b2dJson::j2b2World(Json::Value worldValue)
+b2World* b2dJson::j2b2World(Json::Value &worldValue)
 {
     b2World* world = new b2World( jsonToVec("gravity", worldValue) );
     world->SetAllowSleeping( worldValue["allowSleep"].asBool() );
@@ -1011,7 +1042,7 @@ b2World* b2dJson::j2b2World(Json::Value worldValue)
     return world;
 }
 
-void b2dJson::j2Intob2World(b2World *world, Json::Value worldValue)
+bool b2dJson::j2Intob2World(b2World *world, Json::Value &worldValue)
 {
     m_bodies.clear();
 
@@ -1072,9 +1103,11 @@ void b2dJson::j2Intob2World(b2World *world, Json::Value worldValue)
 
         imageValue = worldValue["image"][i++];
     }
+
+    return true;
 }
 
-b2Body* b2dJson::j2b2Body(b2World* world, Json::Value bodyValue)
+b2Body* b2dJson::j2b2Body(b2World* world, Json::Value &bodyValue)
 {
     b2Body* body = NULL;
 
@@ -1122,7 +1155,7 @@ b2Body* b2dJson::j2b2Body(b2World* world, Json::Value bodyValue)
     return body;
 }
 
-b2Fixture* b2dJson::j2b2Fixture(b2Body* body, Json::Value fixtureValue)
+b2Fixture* b2dJson::j2b2Fixture(b2Body* body, Json::Value &fixtureValue)
 {
     b2Fixture* fixture = NULL;
 
@@ -1222,7 +1255,7 @@ b2Fixture* b2dJson::j2b2Fixture(b2Body* body, Json::Value fixtureValue)
     return fixture;
 }
 
-b2Joint* b2dJson::j2b2Joint(b2World* world, Json::Value jointValue)
+b2Joint* b2dJson::j2b2Joint(b2World* world, Json::Value &jointValue)
 {
     b2Joint* joint = NULL;
 
@@ -1383,7 +1416,7 @@ b2Joint* b2dJson::j2b2Joint(b2World* world, Json::Value jointValue)
     return joint;
 }
 
-b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value imageValue)
+b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value &imageValue)
 {
     b2dJsonImage* img = new b2dJsonImage();
 
@@ -1401,6 +1434,7 @@ b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value imageValue)
     img->center = jsonToVec("center", imageValue);
     img->angle = jsonToFloat("angle", imageValue);
     img->scale = jsonToFloat("scale", imageValue);
+    img->aspectScale = jsonToFloat("aspectScale", imageValue, -1, 1);
     img->opacity = jsonToFloat("opacity", imageValue);
     img->renderOrder = jsonToFloat("renderOrder", imageValue);
 

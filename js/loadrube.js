@@ -63,12 +63,14 @@ function loadFixtureFromRUBE(body, fixtureJso) {
         fd.filter.maskBits = fixtureJso['filter-maskBits'];
     if ( fixtureJso.hasOwnProperty('filter-groupIndex') )
         fd.filter.groupIndex = fixtureJso['filter-groupIndex'];
+        
+    var fixture = null;
     if (fixtureJso.hasOwnProperty('circle')) {
         fd.shape = new b2CircleShape();
         fd.shape.m_radius = fixtureJso.circle.radius;
         if ( fixtureJso.circle.center )
             fd.shape.m_p.SetV(fixtureJso.circle.center);
-        var fixture = body.CreateFixture(fd);        
+        fixture = body.CreateFixture(fd);        
         if ( fixtureJso.name )
             fixture.name = fixtureJso.name;
     }
@@ -78,7 +80,7 @@ function loadFixtureFromRUBE(body, fixtureJso) {
         for (v = 0; v < fixtureJso.polygon.vertices.x.length; v++) 
            verts.push( new b2Vec2( fixtureJso.polygon.vertices.x[v], fixtureJso.polygon.vertices.y[v] ) );
         fd.shape.SetAsArray(verts, verts.length);
-        var fixture = body.CreateFixture(fd);        
+        fixture = body.CreateFixture(fd);        
         if ( fixture && fixtureJso.name )
             fixture.name = fixtureJso.name;
     }
@@ -89,7 +91,7 @@ function loadFixtureFromRUBE(body, fixtureJso) {
             var thisVertex = new b2Vec2( fixtureJso.chain.vertices.x[v], fixtureJso.chain.vertices.y[v] );
             if ( v > 0 ) {
                 fd.shape.SetAsEdge( lastVertex, thisVertex );
-                var fixture = body.CreateFixture(fd);        
+                fixture = body.CreateFixture(fd);        
                 if ( fixtureJso.name )
                     fixture.name = fixtureJso.name;
             }
@@ -99,6 +101,9 @@ function loadFixtureFromRUBE(body, fixtureJso) {
     else {
         console.log("Could not find shape type for fixture");
     }
+    
+    if ( fixtureJso.hasOwnProperty('customProperties') )
+        fixture.customProperties = fixtureJso.customProperties;
 }
 
 function getVectorValue(val) {
@@ -227,8 +232,12 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
         console.log("Unsupported joint type: " + jointJso.type);
         console.log(jointJso);
     }
+    
     if ( joint && jointJso.name )
-        joint.name = jointJso.name;
+        joint.name = jointJso.name;        
+    if ( jointJso.hasOwnProperty('customProperties') )
+        joint.customProperties = jointJso.customProperties;
+        
     return joint;
 }
 
@@ -254,6 +263,9 @@ function loadImageFromRUBE(imageJso, world, loadedBodies)
         
     image.center = new b2Vec2();
     image.center.SetV( getVectorValue(imageJso.center) );
+    
+    if ( imageJso.hasOwnProperty('customProperties') )
+        image.customProperties = imageJso.customProperties;
     
     return image;
 }

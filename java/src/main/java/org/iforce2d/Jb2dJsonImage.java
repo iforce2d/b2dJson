@@ -48,6 +48,7 @@ public class Jb2dJsonImage {
     Vec2 center;
     float angle;
     float scale;
+    float aspectScale;
     boolean flip;
     float opacity;
     int filter; // 0 = nearest, 1 = linear
