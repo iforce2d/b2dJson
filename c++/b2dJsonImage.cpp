@@ -70,6 +70,7 @@ b2dJsonImage::b2dJsonImage()
     center.SetZero();
     angle = 0;
     scale = 1;
+    aspectScale = 1;
     flip = false;
     filter = FT_LINEAR;
     opacity = 1;
@@ -99,6 +100,7 @@ b2dJsonImage::b2dJsonImage(const b2dJsonImage *other)
     center = other->center;
     angle = other->angle;
     scale = other->scale;
+    aspectScale = other->aspectScale;
     flip = other->flip;
     filter = other->filter;
     opacity = other->opacity;
