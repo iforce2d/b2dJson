@@ -1651,6 +1651,18 @@ int b2dJson::getImagesByName(string name, vector<b2dJsonImage*> &images)
     return images.size();
 }
 
+int b2dJson::getAllBodies(std::vector<b2Body*>& bodies)
+{
+    bodies.insert( bodies.begin(), m_bodies.begin(), m_bodies.end() );
+    return bodies.size();
+}
+
+int b2dJson::getAllJoints(std::vector<b2Joint*>& joints)
+{
+    joints.insert( joints.begin(), m_joints.begin(), m_joints.end() );
+    return joints.size();
+}
+
 int b2dJson::getAllImages(vector<b2dJsonImage*> &images)
 {
     images.insert( images.begin(), m_images.begin(), m_images.end() );

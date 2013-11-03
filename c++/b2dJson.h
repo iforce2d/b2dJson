@@ -124,6 +124,8 @@ public:
     int getJointsByName(std::string name, std::vector<b2Joint*>& joints);
     int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images);
 
+    int getAllBodies(std::vector<b2Body*>& bodies);
+    int getAllJoints(std::vector<b2Joint*>& joints);
     int getAllImages(std::vector<b2dJsonImage*>& images);
 
     b2Body* getBodyByName(std::string name);
