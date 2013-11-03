@@ -937,114 +937,62 @@ void b2dJson::clear()
     m_imageToNameMap.clear();
 }
 
-
-bool b2dJson::parseValueFromString(std::string str, Json::Value& value, std::string& errorMsg)
+b2World *b2dJson::readFromValue(Json::Value worldValue, b2World *existingWorld)
 {
-    Json::Reader reader;
-    if ( ! reader.parse(str, value) )
-    {
-        errorMsg = string("Failed to parse JSON:\n") + reader.getFormatedErrorMessages();
-        return false;
-    }
-    
-    return true;
+    return j2b2World(worldValue, existingWorld);
 }
 
-bool b2dJson::parseValueFromFile(const char* filename, Json::Value& value, std::string& errorMsg)
+b2World* b2dJson::readFromString(std::string str, std::string& errorMsg, b2World* existingWorld)
+{
+    Json::Value worldValue;
+    Json::Reader reader;
+    if ( ! reader.parse(str, worldValue) )
+    {
+        //std::cout  << "Failed to parse string\n" << reader.getFormattedErrorMessages();
+        errorMsg = string("Failed to parse JSON:\n") + reader.getFormatedErrorMessages();
+        return NULL;
+    }
+
+    return j2b2World(worldValue, existingWorld);
+}
+
+b2World* b2dJson::readFromFile(const char* filename, std::string& errorMsg, b2World* existingWorld)
 {
     if (!filename)
-        return false;
-    
+        return NULL;
+
     std::ifstream ifs;
     ifs.open(filename, std::ios::in);
     if (!ifs) {
         errorMsg = string("Could not open file '") + string(filename) + string("' for reading");
-        return false;
+        return NULL;
     }
-    
+
+    Json::Value worldValue;
     Json::Reader reader;
-    if ( ! reader.parse(ifs, value) )
+    if ( ! reader.parse(ifs, worldValue) )
     {
         errorMsg = string("Failed to parse '") + string(filename) + string("' : ") + reader.getFormatedErrorMessages();
         ifs.close();
-        return false;
+        return NULL;
     }
     ifs.close();
-    
-    return true;
+
+    return j2b2World(worldValue, existingWorld);
 }
 
-
-bool b2dJson::readIntoWorldFromValue(b2World *world, Json::Value &worldValue)
+b2World* b2dJson::j2b2World(Json::Value& worldValue, b2World* world)
 {
-    clear();
-    
-    return j2Intob2World(world, worldValue);
-}
+    m_bodies.clear();
 
-bool b2dJson::readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg)
-{
-    Json::Value worldValue;
-    if ( ! parseValueFromString(str, worldValue, errorMsg) )
-        return false;
-    
-    return j2Intob2World(world, worldValue);
-}
-
-bool b2dJson::readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg)
-{
-    Json::Value worldValue;
-    if ( ! parseValueFromFile(filename, worldValue, errorMsg) )
-        return false;
-    
-    return j2Intob2World(world, worldValue);
-}
-
-
-b2World *b2dJson::readFromValue(Json::Value &worldValue)
-{
-    clear();
-
-    return j2b2World(worldValue);
-}
-
-b2World* b2dJson::readFromString(std::string str, std::string& errorMsg)
-{
-    Json::Value worldValue;
-    if ( ! parseValueFromString(str, worldValue, errorMsg) )
-        return NULL;
-
-    return j2b2World(worldValue);
-}
-
-b2World* b2dJson::readFromFile(const char* filename, std::string& errorMsg)
-{
-    Json::Value worldValue;
-    if (! parseValueFromFile(filename, worldValue, errorMsg) )
-        return NULL;
-
-    return j2b2World(worldValue);
-}
-
-
-b2World* b2dJson::j2b2World(Json::Value &worldValue)
-{
-    b2World* world = new b2World( jsonToVec("gravity", worldValue) );
+    if ( ! world )
+        world = new b2World( jsonToVec("gravity", worldValue) );
     world->SetAllowSleeping( worldValue["allowSleep"].asBool() );
-    
+
     world->SetAutoClearForces( worldValue["autoClearForces"].asBool() );
     world->SetWarmStarting( worldValue["warmStarting"].asBool() );
     world->SetContinuousPhysics( worldValue["continuousPhysics"].asBool() );
     world->SetSubStepping( worldValue["subStepping"].asBool() );
-    
-    j2Intob2World(world, worldValue);
-    
-    return world;
-}
-
-bool b2dJson::j2Intob2World(b2World *world, Json::Value &worldValue)
-{
-    m_bodies.clear();
 
     readCustomPropertiesFromJson(world, worldValue);
 
@@ -1104,7 +1052,7 @@ bool b2dJson::j2Intob2World(b2World *world, Json::Value &worldValue)
         imageValue = worldValue["image"][i++];
     }
 
-    return true;
+    return world;
 }
 
 b2Body* b2dJson::j2b2Body(b2World* world, Json::Value &bodyValue)

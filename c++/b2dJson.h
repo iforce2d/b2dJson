@@ -99,22 +99,18 @@ public:
     void setImageName(b2dJsonImage* image, const char* name);
 
     void addImage(b2dJsonImage* image);
-    
-    //Json::Value extraction functions
-    bool parseValueFromString(std::string str, Json::Value& value, std::string& errorMsg);
-    bool parseValueFromFile(const char* filename, Json::Value& value, std::string& errorMsg);
 
     //reading functions
-    b2World* readFromValue(Json::Value& worldValue);
-    b2World* readFromString(std::string str, std::string& errorMsg);
-    b2World* readFromFile(const char* filename, std::string& errorMsg);
-    
-    //reading into existing world functions
-    bool readIntoWorldFromValue(b2World *world, Json::Value& worldValue);
-    bool readIntoWorldFromString(b2World *world, std::string str, std::string& errorMsg);
-    bool readIntoWorldFromFile(b2World *world, const char* filename, std::string& errorMsg);
+    b2World* readFromValue(Json::Value worldValue, b2World *existingWorld = NULL);
+    b2World* readFromString(std::string str, std::string& errorMsg, b2World *existingWorld = NULL);
+    b2World* readFromFile(const char* filename, std::string& errorMsg, b2World* existingWorld = NULL);
 
-    b2World* j2b2World(Json::Value& worldValue);
+    //backward compatibility
+    bool readIntoWorldFromValue(b2World *existingWorld, Json::Value &worldValue)                    { return readFromValue(worldValue, existingWorld); }
+    bool readIntoWorldFromString(b2World *existingWorld, std::string str, std::string& errorMsg)    { return readFromString(str, errorMsg, existingWorld); }
+    bool readIntoWorldFromFile(b2World *existingWorld, const char* filename, std::string& errorMsg) { return readFromFile(filename, errorMsg, existingWorld); }
+
+    b2World* j2b2World(Json::Value &worldValue, b2World* world = NULL);
     b2Body* j2b2Body(b2World* world, Json::Value& bodyValue);
     b2Fixture* j2b2Fixture(b2Body* body, Json::Value& fixtureValue);
     b2Joint* j2b2Joint(b2World* world, Json::Value& jointValue);
@@ -142,8 +138,6 @@ public:
     std::string getFixtureName(b2Fixture* fixture);
     std::string getJointName(b2Joint* joint);
     std::string getImageName(b2dJsonImage* img);
-
-
 
     ////// custom properties
 
@@ -233,6 +227,7 @@ protected:
     void readCustomPropertiesFromJson(b2dJsonImage* item, Json::Value value);
     void readCustomPropertiesFromJson(b2World* item, Json::Value value);
 
+public:
     //static helpers
     static std::string floatToHex(float f);
     static float hexToFloat(std::string str);
