@@ -1657,6 +1657,15 @@ int b2dJson::getAllBodies(std::vector<b2Body*>& bodies)
     return bodies.size();
 }
 
+int b2dJson::getAllFixtures(std::vector<b2Fixture *> &fixtures)
+{
+    for (int i = 0; i < m_bodies.size(); i++) {
+        for (b2Fixture* f = m_bodies[i]->GetFixtureList(); f; f = f->GetNext())
+            fixtures.push_back(f);
+    }
+    return fixtures.size();
+}
+
 int b2dJson::getAllJoints(std::vector<b2Joint*>& joints)
 {
     joints.insert( joints.begin(), m_joints.begin(), m_joints.end() );
