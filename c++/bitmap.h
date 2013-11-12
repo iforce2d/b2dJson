@@ -565,8 +565,6 @@ public:
         unsigned int j = 0;
 
         for (unsigned int i = 0; i < m_BitmapSize; i++) {
-            RGBA rrrr = m_BitmapData[i];
-            //printf("%d ", rrrr.Alpha);
             *(uint32_t*) BufferPtr =
                     (CColor::Convert(m_BitmapData[i].Blue, 8, BitCountBlue) << BitPosBlue) |
                     (CColor::Convert(m_BitmapData[i].Green, 8, BitCountGreen) << BitPosGreen) |
