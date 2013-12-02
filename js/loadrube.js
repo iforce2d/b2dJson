@@ -48,6 +48,7 @@ function loadBodyFromRUBE(bodyJso, world) {
 
 function loadFixtureFromRUBE(body, fixtureJso) {    
     //console.log(fixtureJso);
+    var fixture = null;
     var fd = new b2FixtureDef();
     if (fixtureJso.hasOwnProperty('friction'))
         fd.friction = fixtureJso.friction;
@@ -63,8 +64,6 @@ function loadFixtureFromRUBE(body, fixtureJso) {
         fd.filter.maskBits = fixtureJso['filter-maskBits'];
     if ( fixtureJso.hasOwnProperty('filter-groupIndex') )
         fd.filter.groupIndex = fixtureJso['filter-groupIndex'];
-        
-    var fixture = null;
     if (fixtureJso.hasOwnProperty('circle')) {
         fd.shape = new b2CircleShape();
         fd.shape.m_radius = fixtureJso.circle.radius;
@@ -102,8 +101,10 @@ function loadFixtureFromRUBE(body, fixtureJso) {
         console.log("Could not find shape type for fixture");
     }
     
-    if ( fixtureJso.hasOwnProperty('customProperties') )
-        fixture.customProperties = fixtureJso.customProperties;
+    if ( fixture ) {        
+        if ( fixtureJso.hasOwnProperty('customProperties') )
+            fixture.customProperties = fixtureJso.customProperties;
+    }
 }
 
 function getVectorValue(val) {
@@ -232,12 +233,12 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
         console.log("Unsupported joint type: " + jointJso.type);
         console.log(jointJso);
     }
-    
-    if ( joint && jointJso.name )
-        joint.name = jointJso.name;        
-    if ( jointJso.hasOwnProperty('customProperties') )
-        joint.customProperties = jointJso.customProperties;
-        
+    if ( joint ) {
+        if ( jointJso.name )
+            joint.name = jointJso.name;
+        if ( jointJso.hasOwnProperty('customProperties') )
+            joint.customProperties = jointJso.customProperties;
+    }
     return joint;
 }
 
@@ -260,12 +261,12 @@ function loadImageFromRUBE(imageJso, world, loadedBodies)
         image.body = loadedBodies[image.body];//change index to the actual body
     else
         image.body = null;
+                
+    if ( ! image.hasOwnProperty('aspectScale') )
+        image.aspectScale = 1;
         
     image.center = new b2Vec2();
     image.center.SetV( getVectorValue(imageJso.center) );
-    
-    if ( imageJso.hasOwnProperty('customProperties') )
-        image.customProperties = imageJso.customProperties;
     
     return image;
 }
@@ -371,22 +372,60 @@ function getNamedImages(world, name) {
 }
 
 //custom properties
+function objectMatchesForCustomProperty(obj, propertyType, propertyName, valueToMatch) {
+    if ( ! obj.hasOwnProperty('customProperties') )
+        return false;
+    for (var i = 0; i < obj.customProperties.length; i++) {
+        if ( ! obj.customProperties[i].hasOwnProperty("name") )
+            continue;
+        if ( ! obj.customProperties[i].hasOwnProperty(propertyType) )
+            continue;
+        if ( obj.customProperties[i].name == propertyName &&
+             obj.customProperties[i][propertyType] == valueToMatch)
+            return true;
+    }
+    return false;
+}
+
 function getBodiesByCustomProperty(world, propertyType, propertyName, valueToMatch) {
     var bodies = [];
-    for (b = world.m_bodyList; b; b = b.m_next) {
-        if ( ! b.hasOwnProperty('customProperties') )
-            continue;
-        for (var i = 0; i < b.customProperties.length; i++) {
-            if ( ! b.customProperties[i].hasOwnProperty("name") )
-                continue;
-            if ( ! b.customProperties[i].hasOwnProperty(propertyType) )
-                continue;
-            if ( b.customProperties[i].name == propertyName &&
-                 b.customProperties[i][propertyType] == valueToMatch)
-                bodies.push(b);
-        }        
+    for (var body = world.m_bodyList; body; body = body.m_next) {
+        if ( objectMatchesForCustomProperty(body, propertyType, propertyName, valueToMatch) )
+            bodies.push(body);
     }
     return bodies;
+}
+
+function getFixturesByCustomProperty(world, propertyType, propertyName, valueToMatch) {
+    var fixtures = [];
+    for (var body = world.m_bodyList; body; body = body.m_next) {
+	for (var fixture = body.m_fixtureList; fixture; fixture = fixture.m_next) {
+            console.log("Checking fixture");
+            if ( objectMatchesForCustomProperty(fixture, propertyType, propertyName, valueToMatch) )
+                fixtures.push(fixture);
+        }
+    }
+    return fixtures;
+}
+
+function getJointsByCustomProperty(world, propertyType, propertyName, valueToMatch) {
+    var joints = [];
+    for (var joint = world.m_jointList; joint; joint = joint.m_next) {
+        console.log("Checking joint");
+        console.log(joint);
+        if ( objectMatchesForCustomProperty(joint, propertyType, propertyName, valueToMatch) )
+            joints.push(joint);
+    }
+    return joints;
+}
+
+function getImagesByCustomProperty(world, propertyType, propertyName, valueToMatch) {
+    var images = [];    
+    for (var i = 0; i < world.images.length; i++) {
+        if ( objectMatchesForCustomProperty(world.images[i], propertyType, propertyName, valueToMatch) )
+            images.push(world.images[i]);
+    }
+    return images;
 }
 
 function hasCustomProperty(item, propertyType, propertyName) {
