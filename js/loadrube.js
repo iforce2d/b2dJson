@@ -400,7 +400,6 @@ function getFixturesByCustomProperty(world, propertyType, propertyName, valueToM
     var fixtures = [];
     for (var body = world.m_bodyList; body; body = body.m_next) {
 	for (var fixture = body.m_fixtureList; fixture; fixture = fixture.m_next) {
-            console.log("Checking fixture");
             if ( objectMatchesForCustomProperty(fixture, propertyType, propertyName, valueToMatch) )
                 fixtures.push(fixture);
         }
@@ -411,8 +410,6 @@ function getFixturesByCustomProperty(world, propertyType, propertyName, valueToM
 function getJointsByCustomProperty(world, propertyType, propertyName, valueToMatch) {
     var joints = [];
     for (var joint = world.m_jointList; joint; joint = joint.m_next) {
-        console.log("Checking joint");
-        console.log(joint);
         if ( objectMatchesForCustomProperty(joint, propertyType, propertyName, valueToMatch) )
             joints.push(joint);
     }
