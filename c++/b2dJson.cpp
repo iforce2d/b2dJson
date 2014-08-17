@@ -1353,9 +1353,9 @@ b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value imageValue)
 
     img->center = jsonToVec("center", imageValue);
     img->angle = jsonToFloat("angle", imageValue);
-    img->scale = jsonToFloat("scale", imageValue);
-    img->aspectScale = jsonToFloat("aspectScale", imageValue);
-    img->opacity = jsonToFloat("opacity", imageValue);
+    img->scale = jsonToFloat("scale", imageValue, -1, 1.0f);
+    img->aspectScale = jsonToFloat("aspectScale", imageValue, -1, 1.0f);
+    img->opacity = jsonToFloat("opacity", imageValue, -1, 1.0f);
     img->renderOrder = jsonToFloat("renderOrder", imageValue);
 
     if ( imageValue.isMember("colorTint") ) {
