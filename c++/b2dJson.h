@@ -106,7 +106,9 @@ public:
     b2dJsonImage* j2b2dJsonImage(Json::Value imageValue);
 
     int getBodiesByName(std::string name, std::vector<b2Body*>& bodies);
+    int getBodiesByNamePrefix(std::string prefix, std::vector<b2Body*>& bodies);
     int getFixturesByName(std::string name, std::vector<b2Fixture*>& fixtures);
+    int getFixturesByNamePrefix(std::string prefix, std::vector<b2Fixture*>& fixtures);
     int getJointsByName(std::string name, std::vector<b2Joint*>& joints);
     int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images);
 
