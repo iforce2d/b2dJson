@@ -1587,6 +1587,18 @@ int b2dJson::getBodiesByName(string name, vector<b2Body*>& bodies)
     return bodies.size();
 }
 
+int b2dJson::getBodiesByNamePrefix(string prefix, vector<b2Body*>& bodies)
+{
+   map<b2Body*, string>::iterator it = m_bodyToNameMap.begin();
+   map<b2Body*, string>::iterator end = m_bodyToNameMap.end();
+   while (it != end) {
+      if (it->second.find(prefix) == 0)  ///< @todo optimize
+         bodies.push_back(it->first);
+      ++it;
+   }
+   return bodies.size();
+}
+
 int b2dJson::getFixturesByName(string name, vector<b2Fixture*>& fixtures)
 {
     map<b2Fixture*,string>::iterator it = m_fixtureToNameMap.begin();
@@ -1597,6 +1609,18 @@ int b2dJson::getFixturesByName(string name, vector<b2Fixture*>& fixtures)
         ++it;
     }
     return fixtures.size();
+}
+
+int b2dJson::getFixturesByNamePrefix(string prefix, vector<b2Fixture*>& fixtures)
+{
+   map<b2Fixture*, string>::iterator it = m_fixtureToNameMap.begin();
+   map<b2Fixture*, string>::iterator end = m_fixtureToNameMap.end();
+   while (it != end) {
+      if (it->second.find(prefix) == 0)  ///< @todo optimize
+         fixtures.push_back(it->first);
+      ++it;
+   }
+   return fixtures.size();
 }
 
 int b2dJson::getJointsByName(string name, vector<b2Joint*>& joints)
