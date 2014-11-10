@@ -105,33 +105,34 @@ public:
     b2Joint* j2b2Joint(b2World* world, Json::Value jointValue);
     b2dJsonImage* j2b2dJsonImage(Json::Value imageValue);
 
-    int getBodiesByName(std::string name, std::vector<b2Body*>& bodies);
-    int getBodiesByNamePrefix(std::string prefix, std::vector<b2Body*>& bodies);
-    int getFixturesByName(std::string name, std::vector<b2Fixture*>& fixtures);
-    int getFixturesByNamePrefix(std::string prefix, std::vector<b2Fixture*>& fixtures);
-    int getJointsByName(std::string name, std::vector<b2Joint*>& joints);
-    int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images);
+    int getBodiesByName(std::string name, std::vector<b2Body*>& bodies) const;
+    int getBodiesByNamePrefix(std::string prefix, std::vector<b2Body*>& bodies) const;
+    int getFixturesByName(std::string name, std::vector<b2Fixture*>& fixtures) const;
+    int getFixturesByNamePrefix(std::string prefix, std::vector<b2Fixture*>& fixtures) const;
+    int getJointsByName(std::string name, std::vector<b2Joint*>& joints) const;
+    int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images) const;
 
-    int getAllImages(std::vector<b2dJsonImage*>& images);
+    int getAllImages(std::vector<b2dJsonImage*>& images) const;
 
-    b2Body* getBodyByName(std::string name);
-    b2Fixture* getFixtureByName(std::string name);
-    b2Joint* getJointByName(std::string name);
-    b2dJsonImage* getImageByName(std::string name);
+    b2Body* getBodyByName(std::string name) const;
+    b2Fixture* getFixtureByName(std::string name) const;
+    b2Joint* getJointByName(std::string name) const;
+    b2dJsonImage* getImageByName(std::string name) const;
 
     std::map<b2Joint*,std::string> getJointToNameMap() const { return m_jointToNameMap; }
     std::map<b2Fixture*,std::string> getFixtureToNameMap() const { return m_fixtureToNameMap; }
 
-    std::string getBodyName(b2Body* body);
-    std::string getFixtureName(b2Fixture* fixture);
-    std::string getJointName(b2Joint* joint);
-    std::string getImageName(b2dJsonImage* img);
+    std::string getBodyName(b2Body* body) const;
+    std::string getFixtureName(b2Fixture* fixture) const;
+    std::string getJointName(b2Joint* joint) const;
+    std::string getImageName(b2dJsonImage* img) const;
 
 
 
     ////// custom properties
 
     b2dJsonCustomProperties* getCustomPropertiesForItem(void* item, bool createIfNotExisting);
+    b2dJsonCustomProperties* getCustomPropertiesForItem(void* item) const;
 protected:
     void setCustomInt(void* item, std::string propertyName, int val);
     void setCustomFloat(void* item, std::string propertyName, float val);
@@ -160,11 +161,11 @@ public:
     bool hasCustomVector(void* item, std::string propertyName);
     bool hasCustomBool(void* item, std::string propertyName);
 
-    int getCustomInt(void* item, std::string propertyName, int defaultVal = 0);
-    float getCustomFloat(void* item, std::string propertyName, float defaultVal = 0);
-    std::string getCustomString(void* item, std::string propertyName, std::string defaultVal = "");
-    b2Vec2 getCustomVector(void* item, std::string propertyName, b2Vec2 defaultVal = b2Vec2(0,0));
-    bool getCustomBool(void* item, std::string propertyName, bool defaultVal = false);
+    int getCustomInt(void* item, std::string propertyName, int defaultVal = 0) const;
+    float getCustomFloat(void* item, std::string propertyName, float defaultVal = 0) const;
+    std::string getCustomString(void* item, std::string propertyName, std::string defaultVal = "") const;
+    b2Vec2 getCustomVector(void* item, std::string propertyName, b2Vec2 defaultVal = b2Vec2(0,0)) const;
+    bool getCustomBool(void* item, std::string propertyName, bool defaultVal = false) const;
 
 //this define saves us writing out 20 functions which are almost exactly the same
 #define DECLARE_GET_BY_CUSTOM_PROPERTY_VALUE_FUNCTIONS_VECTOR(ucType, lcType)\
