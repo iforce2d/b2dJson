@@ -113,6 +113,7 @@ public:
     int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images) const;
 
     int getAllImages(std::vector<b2dJsonImage*>& images) const;
+    const std::vector<b2Body*>& getAllBodies() const { return m_bodies; }
 
     b2Body* getBodyByName(std::string name) const;
     b2Fixture* getFixtureByName(std::string name) const;
