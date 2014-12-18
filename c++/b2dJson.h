@@ -27,7 +27,12 @@
 #include "json/json.h"
 
 class b2dJsonImage;
-class EditorDocument;
+
+class b2dJsonColor4 {
+public:
+    int r, g, b, a;
+    b2dJsonColor4() { r = g = b = a = 255; }
+};
 
 class b2dJsonCustomProperties {
 public:
@@ -36,6 +41,7 @@ public:
     std::map<std::string, std::string> m_customPropertyMap_string;
     std::map<std::string, b2Vec2> m_customPropertyMap_b2Vec2;
     std::map<std::string, bool> m_customPropertyMap_bool;
+    std::map<std::string, b2dJsonColor4> m_customPropertyMap_color;
 };
 
 class b2dJson
@@ -95,15 +101,23 @@ public:
     void addImage(b2dJsonImage* image);
 
     //reading functions
-    b2World* readFromValue(Json::Value worldValue);
-    b2World* readFromString(std::string str, std::string& errorMsg);
-    b2World* readFromFile(const char* filename, std::string& errorMsg);
+    b2World* readFromValue(Json::Value worldValue, b2World *existingWorld = NULL);
+    b2World* readFromString(std::string str, std::string& errorMsg, b2World *existingWorld = NULL);
+    b2World* readFromFile(const char* filename, std::string& errorMsg, b2World* existingWorld = NULL);
 
-    b2World* j2b2World(Json::Value worldValue);
-    b2Body* j2b2Body(b2World* world, Json::Value bodyValue);
-    b2Fixture* j2b2Fixture(b2Body* body, Json::Value fixtureValue);
-    b2Joint* j2b2Joint(b2World* world, Json::Value jointValue);
-    b2dJsonImage* j2b2dJsonImage(Json::Value imageValue);
+    //backward compatibility
+    bool readIntoWorldFromValue(b2World *existingWorld, Json::Value &worldValue)                    { return readFromValue(worldValue, existingWorld); }
+    bool readIntoWorldFromString(b2World *existingWorld, std::string str, std::string& errorMsg)    { return readFromString(str, errorMsg, existingWorld); }
+    bool readIntoWorldFromFile(b2World *existingWorld, const char* filename, std::string& errorMsg) { return readFromFile(filename, errorMsg, existingWorld); }
+
+    b2World* j2b2World(Json::Value &worldValue, b2World* world = NULL);
+    b2Body* j2b2Body(b2World* world, Json::Value& bodyValue);
+    b2Fixture* j2b2Fixture(b2Body* body, Json::Value& fixtureValue);
+    b2Joint* j2b2Joint(b2World* world, Json::Value& jointValue);
+    b2dJsonImage* j2b2dJsonImage(Json::Value& imageValue);
+
+    //function copies json world into existing world
+    bool j2Intob2World(b2World *world, Json::Value& worldValue);
 
     int getBodiesByName(std::string name, std::vector<b2Body*>& bodies) const;
     int getBodiesByNamePrefix(std::string prefix, std::vector<b2Body*>& bodies) const;
@@ -114,6 +128,9 @@ public:
 
     int getAllImages(std::vector<b2dJsonImage*>& images) const;
     const std::vector<b2Body*>& getAllBodies() const { return m_bodies; }
+    int getAllBodies(std::vector<b2Body*>& bodies);
+    int getAllFixtures(std::vector<b2Fixture*>& fixtures);
+    int getAllJoints(std::vector<b2Joint*>& joints);
 
     b2Body* getBodyByName(std::string name) const;
     b2Fixture* getFixtureByName(std::string name) const;
@@ -128,8 +145,6 @@ public:
     std::string getJointName(b2Joint* joint) const;
     std::string getImageName(b2dJsonImage* img) const;
 
-
-
     ////// custom properties
 
     b2dJsonCustomProperties* getCustomPropertiesForItem(void* item, bool createIfNotExisting);
@@ -140,6 +155,7 @@ protected:
     void setCustomString(void* item, std::string propertyName, std::string val);
     void setCustomVector(void* item, std::string propertyName, b2Vec2 val);
     void setCustomBool(void* item, std::string propertyName, bool val);
+    void setCustomColor(void* item, std::string propertyName, b2dJsonColor4 val);
 
 public:
 //this define saves us writing out 25 functions which are almost exactly the same
@@ -155,18 +171,21 @@ public:
     DECLARE_SET_CUSTOM_PROPERTY_VALUE_FUNCTIONS(String, std::string)
     DECLARE_SET_CUSTOM_PROPERTY_VALUE_FUNCTIONS(Vector, b2Vec2)
     DECLARE_SET_CUSTOM_PROPERTY_VALUE_FUNCTIONS(Bool, bool)
+    DECLARE_SET_CUSTOM_PROPERTY_VALUE_FUNCTIONS(Color, b2dJsonColor4)
 
     bool hasCustomInt(void* item, std::string propertyName);
     bool hasCustomFloat(void* item, std::string propertyName);
     bool hasCustomString(void* item, std::string propertyName);
     bool hasCustomVector(void* item, std::string propertyName);
     bool hasCustomBool(void* item, std::string propertyName);
+    bool hasCustomColor(void* item, std::string propertyName);
 
     int getCustomInt(void* item, std::string propertyName, int defaultVal = 0) const;
     float getCustomFloat(void* item, std::string propertyName, float defaultVal = 0) const;
     std::string getCustomString(void* item, std::string propertyName, std::string defaultVal = "") const;
     b2Vec2 getCustomVector(void* item, std::string propertyName, b2Vec2 defaultVal = b2Vec2(0,0)) const;
     bool getCustomBool(void* item, std::string propertyName, bool defaultVal = false) const;
+    b2dJsonColor4 getCustomColor(void* item, std::string propertyName, b2dJsonColor4 defaultVal = b2dJsonColor4());
 
 //this define saves us writing out 20 functions which are almost exactly the same
 #define DECLARE_GET_BY_CUSTOM_PROPERTY_VALUE_FUNCTIONS_VECTOR(ucType, lcType)\
@@ -215,6 +234,7 @@ protected:
     void readCustomPropertiesFromJson(b2dJsonImage* item, Json::Value value);
     void readCustomPropertiesFromJson(b2World* item, Json::Value value);
 
+public:
     //static helpers
     static std::string floatToHex(float f);
     static float hexToFloat(std::string str);
