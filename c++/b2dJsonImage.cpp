@@ -19,6 +19,7 @@
 #include <cstring>
 #include <Box2D/Box2D.h>
 #include "b2dJsonImage.h"
+#include "bitmap.h"
 
 // helper functions
 
