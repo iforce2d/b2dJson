@@ -793,16 +793,18 @@ public class Jb2dJson {
 		m_imageToNameMap.clear();
 	}
 
-	public World readFromJSONObject(JSONObject worldValue) throws JSONException {
+	// Pass null for existingWorld to create a new world
+	public World readFromJSONObject(JSONObject worldValue, World existingWorld) throws JSONException {
 		clear();
 
-		return j2b2World(worldValue);
+		return j2b2World(worldValue, existingWorld);
 	}
 
-	public World readFromString(String str, StringBuilder errorMsg) {
+	// Pass null for existingWorld to create a new world
+	public World readFromString(String str, StringBuilder errorMsg, World existingWorld) {
 		try {
 			JSONObject worldValue = new JSONObject(str);
-			return j2b2World(worldValue);
+			return j2b2World(worldValue, existingWorld);
 		} catch (JSONException e) {
 			errorMsg.append("Failed to parse JSON");
 			e.printStackTrace();
@@ -810,7 +812,8 @@ public class Jb2dJson {
 		}
 	}
 
-	public World readFromFile(String filename, StringBuilder errorMsg) {
+	// Pass null for existingWorld to create a new world
+	public World readFromFile(String filename, StringBuilder errorMsg, World existingWorld) {
 		if (null == filename)
 			return null;
 
@@ -833,7 +836,7 @@ public class Jb2dJson {
 
 		try {
 			JSONObject worldValue = new JSONObject(str);
-			return j2b2World(worldValue);
+			return j2b2World(worldValue, existingWorld);
 		} catch (JSONException e) {
 			errorMsg.append("\nFailed to parse JSON: " + filename);
 			e.printStackTrace();
@@ -841,8 +844,10 @@ public class Jb2dJson {
 		}
 	}
 
-	public World j2b2World(JSONObject worldValue) throws JSONException {
-		World world = new World(jsonToVec("gravity", worldValue));
+	public World j2b2World(JSONObject worldValue, World existingWorld) throws JSONException {
+		World world = existingWorld;
+		if ( world == null )
+			world = new World(jsonToVec("gravity", worldValue));
 
 		world.setAllowSleep(worldValue.getBoolean("allowSleep"));
 
