@@ -425,7 +425,7 @@ Json::Value b2dJson::b2j(b2Joint* joint)
             floatToJson("refAngle", motorJoint->GetAngularOffset(), jointValue);
             floatToJson("maxForce", motorJoint->GetMaxForce(), jointValue);
             floatToJson("maxTorque", motorJoint->GetMaxTorque(), jointValue);
-            //floatToJson("correctionFactor", motorJoint->GetCorrectionFactor(), jointValue);
+            floatToJson("correctionFactor", motorJoint->GetCorrectionFactor(), jointValue);
         }
         break;
     case e_weldJoint:
