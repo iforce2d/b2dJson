@@ -948,8 +948,7 @@ b2World* b2dJson::readFromString(std::string str, std::string& errorMsg, b2World
     Json::Reader reader;
     if ( ! reader.parse(str, worldValue) )
     {
-        //std::cout  << "Failed to parse string\n" << reader.getFormattedErrorMessages();
-        errorMsg = string("Failed to parse JSON:\n") + reader.getFormatedErrorMessages();
+        errorMsg = string("Failed to parse JSON:\n") + reader.getFormattedErrorMessages();
         return NULL;
     }
 
@@ -972,7 +971,7 @@ b2World* b2dJson::readFromFile(const char* filename, std::string& errorMsg, b2Wo
     Json::Reader reader;
     if ( ! reader.parse(ifs, worldValue) )
     {
-        errorMsg = string("Failed to parse '") + string(filename) + string("' : ") + reader.getFormatedErrorMessages();
+        errorMsg = string("Failed to parse '") + string(filename) + string("' : ") + reader.getFormattedErrorMessages();
         ifs.close();
         return NULL;
     }
