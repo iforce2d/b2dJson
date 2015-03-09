@@ -560,7 +560,7 @@ void b2dJson::addImage(b2dJsonImage *image)
 
 b2dJsonCustomProperties *b2dJson::getCustomPropertiesForItem(void *item, bool createIfNotExisting)
 {
-    std::map<void*,b2dJsonCustomProperties*>::iterator it = m_customPropertiesMap.find(item);
+    std::map<void*, b2dJsonCustomProperties*>::const_iterator it = m_customPropertiesMap.find(item);
     if ( it != m_customPropertiesMap.end() )
         return it->second;
 
@@ -572,6 +572,15 @@ b2dJsonCustomProperties *b2dJson::getCustomPropertiesForItem(void *item, bool cr
 
     return props;
 }
+b2dJsonCustomProperties *b2dJson::getCustomPropertiesForItem(void *item) const
+{
+   std::map<void*, b2dJsonCustomProperties*>::const_iterator it = m_customPropertiesMap.find(item);
+   if (it != m_customPropertiesMap.end())
+      return it->second;
+
+   return NULL;
+}
+
 
 void b2dJson::setCustomInt(void* item, string propertyName, int val)        { getCustomPropertiesForItem(item, true)->m_customPropertyMap_int[propertyName] = val; }
 void b2dJson::setCustomFloat(void* item, string propertyName, float val)    { getCustomPropertiesForItem(item, true)->m_customPropertyMap_float[propertyName] = val; }
@@ -580,16 +589,16 @@ void b2dJson::setCustomVector(void* item, string propertyName, b2Vec2 val)  { ge
 void b2dJson::setCustomBool(void* item, string propertyName, bool val)      { getCustomPropertiesForItem(item, true)->m_customPropertyMap_bool[propertyName] = val; }
 void b2dJson::setCustomColor(void* item, string propertyName, b2dJsonColor4 val)    { getCustomPropertiesForItem(item, true)->m_customPropertyMap_color[propertyName] = val; }
 
-bool b2dJson::hasCustomInt(void *item, string propertyName)     { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_int.count(propertyName) > 0; }
-bool b2dJson::hasCustomFloat(void *item, string propertyName)   { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_float.count(propertyName) > 0; }
-bool b2dJson::hasCustomString(void *item, string propertyName)  { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_string.count(propertyName) > 0; }
-bool b2dJson::hasCustomVector(void *item, string propertyName)  { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_b2Vec2.count(propertyName) > 0; }
-bool b2dJson::hasCustomBool(void *item, string propertyName)    { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_bool.count(propertyName) > 0; }
+bool b2dJson::hasCustomInt(void *item, string propertyName)     { return getCustomPropertiesForItem(item) != NULL && getCustomPropertiesForItem(item)->m_customPropertyMap_int.count(propertyName) > 0; }
+bool b2dJson::hasCustomFloat(void *item, string propertyName)   { return getCustomPropertiesForItem(item) != NULL && getCustomPropertiesForItem(item)->m_customPropertyMap_float.count(propertyName) > 0; }
+bool b2dJson::hasCustomString(void *item, string propertyName)  { return getCustomPropertiesForItem(item) != NULL && getCustomPropertiesForItem(item)->m_customPropertyMap_string.count(propertyName) > 0; }
+bool b2dJson::hasCustomVector(void *item, string propertyName)  { return getCustomPropertiesForItem(item) != NULL && getCustomPropertiesForItem(item)->m_customPropertyMap_b2Vec2.count(propertyName) > 0; }
+bool b2dJson::hasCustomBool(void *item, string propertyName)    { return getCustomPropertiesForItem(item) != NULL && getCustomPropertiesForItem(item)->m_customPropertyMap_bool.count(propertyName) > 0; }
 bool b2dJson::hasCustomColor(void *item, string propertyName)   { return getCustomPropertiesForItem(item, false) != NULL && getCustomPropertiesForItem(item, false)->m_customPropertyMap_color.count(propertyName) > 0; }
 
-int b2dJson::getCustomInt(void *item, string propertyName, int defaultVal)
+int b2dJson::getCustomInt(void *item, string propertyName, int defaultVal) const
 {
-    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item);
     if ( !props )
         return defaultVal;
     std::map<string,int>::iterator it = props->m_customPropertyMap_int.find(propertyName);
@@ -598,9 +607,9 @@ int b2dJson::getCustomInt(void *item, string propertyName, int defaultVal)
     return defaultVal;
 }
 
-float b2dJson::getCustomFloat(void *item, string propertyName, float defaultVal)
+float b2dJson::getCustomFloat(void *item, string propertyName, float defaultVal) const
 {
-    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item);
     if ( !props )
         return defaultVal;
     std::map<string,float>::iterator it = props->m_customPropertyMap_float.find(propertyName);
@@ -609,20 +618,20 @@ float b2dJson::getCustomFloat(void *item, string propertyName, float defaultVal)
     return defaultVal;
 }
 
-string b2dJson::getCustomString(void *item, string propertyName, string defaultVal)
+string b2dJson::getCustomString(void *item, string propertyName, string defaultVal) const
 {
-    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item);
     if ( !props )
         return defaultVal;
-    std::map<string,string>::iterator it = props->m_customPropertyMap_string.find(propertyName);
+    std::map<string,string>::const_iterator it = props->m_customPropertyMap_string.find(propertyName);
     if ( it != props->m_customPropertyMap_string.end() )
         return it->second;
     return defaultVal;
 }
 
-b2Vec2 b2dJson::getCustomVector(void *item, string propertyName, b2Vec2 defaultVal)
+b2Vec2 b2dJson::getCustomVector(void *item, string propertyName, b2Vec2 defaultVal) const
 {
-    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item);
     if ( !props )
         return defaultVal;
     std::map<string,b2Vec2>::iterator it = props->m_customPropertyMap_b2Vec2.find(propertyName);
@@ -631,9 +640,9 @@ b2Vec2 b2dJson::getCustomVector(void *item, string propertyName, b2Vec2 defaultV
     return defaultVal;
 }
 
-bool b2dJson::getCustomBool(void *item, string propertyName, bool defaultVal)
+bool b2dJson::getCustomBool(void *item, string propertyName, bool defaultVal) const
 {
-    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item, false);
+    b2dJsonCustomProperties* props = getCustomPropertiesForItem(item);
     if ( !props )
         return defaultVal;
     std::map<string,bool>::iterator it = props->m_customPropertyMap_bool.find(propertyName);
@@ -1383,9 +1392,9 @@ b2dJsonImage* b2dJson::j2b2dJsonImage(Json::Value &imageValue)
 
     img->center = jsonToVec("center", imageValue);
     img->angle = jsonToFloat("angle", imageValue);
-    img->scale = jsonToFloat("scale", imageValue);
-    img->aspectScale = jsonToFloat("aspectScale", imageValue, -1, 1);
-    img->opacity = jsonToFloat("opacity", imageValue);
+    img->scale = jsonToFloat("scale", imageValue, -1, 1.0f);
+    img->aspectScale = jsonToFloat("aspectScale", imageValue, -1, 1.0f);
+    img->opacity = jsonToFloat("opacity", imageValue, -1, 1.0f);
     img->renderOrder = jsonToFloat("renderOrder", imageValue);
 
     if ( imageValue.isMember("colorTint") ) {
@@ -1545,7 +1554,7 @@ float b2dJson::hexToFloat(std::string str)
 
 b2Body* b2dJson::lookupBodyFromIndex( unsigned int index )
 {
-    std::map<int,b2Body*>::iterator it = m_indexToBodyMap.find(index);
+    std::map<int, b2Body*>::const_iterator it = m_indexToBodyMap.find(index);
     if ( it != m_indexToBodyMap.end() )
         return it->second;
     else
@@ -1554,7 +1563,7 @@ b2Body* b2dJson::lookupBodyFromIndex( unsigned int index )
 
 int b2dJson::lookupBodyIndex( b2Body* body )
 {
-    std::map<b2Body*,int>::iterator it = m_bodyToIndexMap.find(body);
+    std::map<b2Body*, int>::const_iterator it = m_bodyToIndexMap.find(body);
     if ( it != m_bodyToIndexMap.end() )
         return it->second;
     else
@@ -1563,7 +1572,7 @@ int b2dJson::lookupBodyIndex( b2Body* body )
 
 int b2dJson::lookupJointIndex( b2Joint* joint )
 {
-    std::map<b2Joint*,int>::iterator it = m_jointToIndexMap.find(joint);
+    std::map<b2Joint*, int>::const_iterator it = m_jointToIndexMap.find(joint);
     if ( it != m_jointToIndexMap.end() )
         return it->second;
     else
@@ -1573,42 +1582,42 @@ int b2dJson::lookupJointIndex( b2Joint* joint )
 
 
 
-string b2dJson::getBodyName(b2Body* body)
+string b2dJson::getBodyName(b2Body* body) const
 {
-    map<b2Body*,string>::iterator it = m_bodyToNameMap.find( body );
+    map<b2Body*,string>::const_iterator it = m_bodyToNameMap.find( body );
     if ( it == m_bodyToNameMap.end() )
         return "";
     return it->second;
 }
 
-string b2dJson::getFixtureName(b2Fixture* fixture)
+string b2dJson::getFixtureName(b2Fixture* fixture) const
 {
-    map<b2Fixture*,string>::iterator it = m_fixtureToNameMap.find( fixture );
+    map<b2Fixture*, string>::const_iterator it = m_fixtureToNameMap.find(fixture);
     if ( it == m_fixtureToNameMap.end() )
         return "";
     return it->second;
 }
 
-string b2dJson::getJointName(b2Joint* joint)
+string b2dJson::getJointName(b2Joint* joint) const
 {
-    map<b2Joint*,string>::iterator it = m_jointToNameMap.find( joint );
+    map<b2Joint*, string>::const_iterator it = m_jointToNameMap.find(joint);
     if ( it == m_jointToNameMap.end() )
         return "";
     return it->second;
 }
 
-string b2dJson::getImageName(b2dJsonImage *img)
+string b2dJson::getImageName(b2dJsonImage *img) const
 {
-    map<b2dJsonImage*,string>::iterator it = m_imageToNameMap.find( img );
+    map<b2dJsonImage*, string>::const_iterator it = m_imageToNameMap.find(img);
     if ( it == m_imageToNameMap.end() )
         return "";
     return it->second;
 }
 
-int b2dJson::getBodiesByName(string name, vector<b2Body*>& bodies)
+int b2dJson::getBodiesByName(string name, vector<b2Body*>& bodies) const
 {
-    map<b2Body*,string>::iterator it = m_bodyToNameMap.begin();
-    map<b2Body*,string>::iterator end = m_bodyToNameMap.end();
+    map<b2Body*, string>::const_iterator it = m_bodyToNameMap.begin();
+    map<b2Body*, string>::const_iterator& end = m_bodyToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             bodies.push_back(it->first);
@@ -1617,10 +1626,22 @@ int b2dJson::getBodiesByName(string name, vector<b2Body*>& bodies)
     return bodies.size();
 }
 
-int b2dJson::getFixturesByName(string name, vector<b2Fixture*>& fixtures)
+int b2dJson::getBodiesByNamePrefix(string prefix, vector<b2Body*>& bodies) const
 {
-    map<b2Fixture*,string>::iterator it = m_fixtureToNameMap.begin();
-    map<b2Fixture*,string>::iterator end = m_fixtureToNameMap.end();
+   map<b2Body*, string>::const_iterator it = m_bodyToNameMap.begin();
+   map<b2Body*, string>::const_iterator& end = m_bodyToNameMap.end();
+   while (it != end) {
+      if (it->second.find(prefix) == 0)  ///< @todo optimize
+         bodies.push_back(it->first);
+      ++it;
+   }
+   return bodies.size();
+}
+
+int b2dJson::getFixturesByName(string name, vector<b2Fixture*>& fixtures) const
+{
+    map<b2Fixture*, string>::const_iterator it = m_fixtureToNameMap.begin();
+    map<b2Fixture*, string>::const_iterator& end = m_fixtureToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             fixtures.push_back(it->first);
@@ -1629,10 +1650,22 @@ int b2dJson::getFixturesByName(string name, vector<b2Fixture*>& fixtures)
     return fixtures.size();
 }
 
-int b2dJson::getJointsByName(string name, vector<b2Joint*>& joints)
+int b2dJson::getFixturesByNamePrefix(string prefix, vector<b2Fixture*>& fixtures) const
 {
-    map<b2Joint*,string>::iterator it = m_jointToNameMap.begin();
-    map<b2Joint*,string>::iterator end = m_jointToNameMap.end();
+   map<b2Fixture*, string>::const_iterator it = m_fixtureToNameMap.begin();
+   map<b2Fixture*, string>::const_iterator& end = m_fixtureToNameMap.end();
+   while (it != end) {
+      if (it->second.find(prefix) == 0)  ///< @todo optimize
+         fixtures.push_back(it->first);
+      ++it;
+   }
+   return fixtures.size();
+}
+
+int b2dJson::getJointsByName(string name, vector<b2Joint*>& joints) const
+{
+    map<b2Joint*, string>::const_iterator it = m_jointToNameMap.begin();
+    map<b2Joint*, string>::const_iterator& end = m_jointToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             joints.push_back(it->first);
@@ -1641,15 +1674,22 @@ int b2dJson::getJointsByName(string name, vector<b2Joint*>& joints)
     return joints.size();
 }
 
-int b2dJson::getImagesByName(string name, vector<b2dJsonImage*> &images)
+int b2dJson::getImagesByName(string name, vector<b2dJsonImage*> &images) const
 {
-    map<b2dJsonImage*,string>::iterator it = m_imageToNameMap.begin();
-    map<b2dJsonImage*,string>::iterator end = m_imageToNameMap.end();
+    map<b2dJsonImage*, string>::const_iterator it = m_imageToNameMap.begin();
+    map<b2dJsonImage*, string>::const_iterator& end = m_imageToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             images.push_back(it->first);
         ++it;
     }
+    return images.size();
+}
+
+int b2dJson::getAllImages(vector<b2dJsonImage*> &images) const
+{
+    images.insert( images.begin(), m_images.begin(), m_images.end() );
+    std::sort(images.begin(), images.end(), b2dJsonImage_renderOrder_ascending);
     return images.size();
 }
 
@@ -1674,18 +1714,10 @@ int b2dJson::getAllJoints(std::vector<b2Joint*>& joints)
     return joints.size();
 }
 
-int b2dJson::getAllImages(vector<b2dJsonImage*> &images)
+b2Body* b2dJson::getBodyByName(string name) const
 {
-    images.insert( images.begin(), m_images.begin(), m_images.end() );
-    std::sort(images.begin(), images.end(), b2dJsonImage_renderOrder_ascending);
-    return images.size();
-}
-
-
-b2Body* b2dJson::getBodyByName(string name)
-{
-    map<b2Body*,string>::iterator it = m_bodyToNameMap.begin();
-    map<b2Body*,string>::iterator end = m_bodyToNameMap.end();
+    map<b2Body*, string>::const_iterator it = m_bodyToNameMap.begin();
+    map<b2Body*, string>::const_iterator& end = m_bodyToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             return it->first;
@@ -1694,10 +1726,10 @@ b2Body* b2dJson::getBodyByName(string name)
     return NULL;
 }
 
-b2Fixture* b2dJson::getFixtureByName(string name)
+b2Fixture* b2dJson::getFixtureByName(string name) const
 {
-    map<b2Fixture*,string>::iterator it = m_fixtureToNameMap.begin();
-    map<b2Fixture*,string>::iterator end = m_fixtureToNameMap.end();
+    map<b2Fixture*, string>::const_iterator it = m_fixtureToNameMap.begin();
+    map<b2Fixture*, string>::const_iterator& end = m_fixtureToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             return it->first;
@@ -1706,10 +1738,10 @@ b2Fixture* b2dJson::getFixtureByName(string name)
     return NULL;
 }
 
-b2Joint* b2dJson::getJointByName(string name)
+b2Joint* b2dJson::getJointByName(string name) const
 {
-    map<b2Joint*,string>::iterator it = m_jointToNameMap.begin();
-    map<b2Joint*,string>::iterator end = m_jointToNameMap.end();
+    map<b2Joint*, string>::const_iterator it = m_jointToNameMap.begin();
+    map<b2Joint*, string>::const_iterator& end = m_jointToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             return it->first;
@@ -1718,10 +1750,10 @@ b2Joint* b2dJson::getJointByName(string name)
     return NULL;
 }
 
-b2dJsonImage* b2dJson::getImageByName(string name)
+b2dJsonImage* b2dJson::getImageByName(string name) const
 {
-    map<b2dJsonImage*,string>::iterator it = m_imageToNameMap.begin();
-    map<b2dJsonImage*,string>::iterator end = m_imageToNameMap.end();
+    map<b2dJsonImage*, string>::const_iterator it = m_imageToNameMap.begin();
+    map<b2dJsonImage*, string>::const_iterator& end = m_imageToNameMap.end();
     while (it != end) {
         if ( it->second == name )
             return it->first;
