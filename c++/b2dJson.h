@@ -60,6 +60,11 @@ protected:
     std::map<b2Joint*,std::string> m_jointToNameMap;
     std::map<b2dJsonImage*,std::string> m_imageToNameMap;
 
+    std::map<b2Body*,std::string> m_bodyToPathMap;
+    std::map<b2Fixture*,std::string> m_fixtureToPathMap;
+    std::map<b2Joint*,std::string> m_jointToPathMap;
+    std::map<b2dJsonImage*,std::string> m_imageToPathMap;
+
     // This maps an item (b2Body*, b2Fixture* etc) to a set of custom properties.
     // Use NULL for world properties.
     std::map<void*,b2dJsonCustomProperties*> m_customPropertiesMap;
@@ -98,6 +103,11 @@ public:
     void setJointName(b2Joint* joint, const char* name);
     void setImageName(b2dJsonImage* image, const char* name);
 
+    void setBodyPath(b2Body* body, const char* path);
+    void setFixturePath(b2Fixture* fixture, const char* path);
+    void setJointPath(b2Joint* joint, const char* path);
+    void setImagePath(b2dJsonImage* image, const char* path);
+
     void addImage(b2dJsonImage* image);
 
     //reading functions
@@ -124,6 +134,11 @@ public:
     int getJointsByName(std::string name, std::vector<b2Joint*>& joints);
     int getImagesByName(std::string name, std::vector<b2dJsonImage*>& images);
 
+    int getBodiesByPath(std::string path, std::vector<b2Body*>& bodies);
+    int getFixturesByPath(std::string path, std::vector<b2Fixture*>& fixtures);
+    int getJointsByPath(std::string path, std::vector<b2Joint*>& joints);
+    int getImagesByPath(std::string path, std::vector<b2dJsonImage*>& images);
+
     int getAllBodies(std::vector<b2Body*>& bodies);
     int getAllFixtures(std::vector<b2Fixture*>& fixtures);
     int getAllJoints(std::vector<b2Joint*>& joints);
@@ -134,6 +149,11 @@ public:
     b2Joint* getJointByName(std::string name);
     b2dJsonImage* getImageByName(std::string name);
 
+    b2Body* getBodyByPathAndName(std::string path, std::string name);
+    b2Fixture* getFixtureByPathAndName(std::string path, std::string name);
+    b2Joint* getJointByPathAndName(std::string path, std::string name);
+    b2dJsonImage* getImageByPathAndName(std::string path, std::string name);
+
     std::map<b2Joint*,std::string> getJointToNameMap() const { return m_jointToNameMap; }
     std::map<b2Fixture*,std::string> getFixtureToNameMap() const { return m_fixtureToNameMap; }
 
@@ -141,6 +161,11 @@ public:
     std::string getFixtureName(b2Fixture* fixture);
     std::string getJointName(b2Joint* joint);
     std::string getImageName(b2dJsonImage* img);
+
+    std::string getBodyPath(b2Body* body);
+    std::string getFixturePath(b2Fixture* fixture);
+    std::string getJointPath(b2Joint* joint);
+    std::string getImagePath(b2dJsonImage* img);
 
     ////// custom properties
 
