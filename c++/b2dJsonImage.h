@@ -34,6 +34,7 @@ class b2dJsonImage {
 public:
     std::string name;
     std::string file;
+    std::string path;
     b2Body* body;
     b2Vec2 center;
     float angle;
