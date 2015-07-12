@@ -854,6 +854,17 @@ void b2dJson::readCustomPropertiesFromJson(b2Type* item, Json::Value value)\
             bool val = propValue.get("bool", 0).asBool();\
             setCustomBool(item, propertyName, val);\
         }\
+        if ( propValue.isMember("color") ) {\
+            Json::Value colorArray = propValue["color"];\
+            if ( colorArray.isArray() && colorArray.size() > 3 ) {\
+                b2dJsonColor4 val;\
+                val.r = colorArray[0].asInt();\
+                val.g = colorArray[1].asInt();\
+                val.b = colorArray[2].asInt();\
+                val.a = colorArray[3].asInt();\
+                setCustomColor(item, propertyName, val);\
+            }\
+        }\
 \
         propValue = value["customProperties"][i++];\
     }\
