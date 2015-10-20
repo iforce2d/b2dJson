@@ -3,27 +3,33 @@ Object.prototype.hasOwnProperty = function(property) {
     return typeof(this[property]) !== 'undefined'
 };
 
+// Apply multiple properties at once when loading bodies, fixtures, and joints
+function applyProperties(source, dest, props) {
+  for(var i = 0; i < props.length; ++i) {
+    var srcName, destName;
+    if(typeof props[i] == "string") // Source and destination names are the same
+      srcName = destName = props[i];
+    else {  // Must be a 2-member array with source and destination names
+      srcName = props[i][0];
+      destName = props[i][1];
+    }
+    if(source.hasOwnProperty(srcName))
+      dest[destName] = source[srcName];
+  }
+}
+
 function loadBodyFromRUBE(bodyJso, world) {
     //console.log(bodyJso);
-    
-    if ( ! bodyJso.hasOwnProperty('type') ) {
+
+    var bd = new b2BodyDef();
+    switch(bodyJso.type) {
+      case undefined:
         console.log("Body does not have a 'type' property");
         return null;
-    }    
-    
-    var bd = new b2BodyDef();
-    if ( bodyJso.type == 2 )
-        bd.type = b2_dynamicBody;
-    else if ( bodyJso.type == 1 )
-        bd.type = b2_kinematicBody;
-    if ( bodyJso.hasOwnProperty('angle') )
-        bd.angle = bodyJso.angle;
-    if ( bodyJso.hasOwnProperty('angularVelocity') )
-        bd.angularVelocity = bodyJso.angularVelocity;
-    if ( bodyJso.hasOwnProperty('active') )
-        bd.awake = bodyJso.active;        
-    if ( bodyJso.hasOwnProperty('fixedRotation') )
-        bd.fixedRotation = bodyJso.fixedRotation;
+      case 1: bd.type = b2_kinematicBody; break;
+      case 2: bd.type = b2_dynamicBody; break;
+    }
+    applyProperties(bodyJso, bd, ['angle', 'angularVelocity', ['active', 'awake'], 'fixedRotation', 'name', 'customProperties']);
     if ( bodyJso.hasOwnProperty('linearVelocity') && bodyJso.linearVelocity instanceof Object )
         bd.linearVelocity.SetV( bodyJso.linearVelocity );
     if ( bodyJso.hasOwnProperty('position') && bodyJso.position instanceof Object )
@@ -39,10 +45,6 @@ function loadBodyFromRUBE(bodyJso, world) {
             loadFixtureFromRUBE(body, fixtureJso);
         }
     }
-    if ( bodyJso.hasOwnProperty('name') )
-        body.name = bodyJso.name;
-    if ( bodyJso.hasOwnProperty('customProperties') )
-        body.customProperties = bodyJso.customProperties;
     return body;
 }
 
@@ -50,20 +52,8 @@ function loadFixtureFromRUBE(body, fixtureJso) {
     //console.log(fixtureJso);
     var fixture = null;
     var fd = new b2FixtureDef();
-    if (fixtureJso.hasOwnProperty('friction'))
-        fd.friction = fixtureJso.friction;
-    if (fixtureJso.hasOwnProperty('density'))
-        fd.density = fixtureJso.density;
-    if (fixtureJso.hasOwnProperty('restitution'))
-        fd.restitution = fixtureJso.restitution;
-    if (fixtureJso.hasOwnProperty('sensor'))
-        fd.isSensor = fixtureJso.sensor;
-    if ( fixtureJso.hasOwnProperty('filter-categoryBits') )
-        fd.filter.categoryBits = fixtureJso['filter-categoryBits'];
-    if ( fixtureJso.hasOwnProperty('filter-maskBits') )
-        fd.filter.maskBits = fixtureJso['filter-maskBits'];
-    if ( fixtureJso.hasOwnProperty('filter-groupIndex') )
-        fd.filter.groupIndex = fixtureJso['filter-groupIndex'];
+    applyProperties(fixtureJso, fd, ['friction', 'density', 'restitution', ['sensor', 'isSensor']]);
+    applyProperties(fixtureJso, fd.filter, [['filter-categoryBits', 'categoryBits'], ['filter-maskBits', 'maskBits'], ['filter-groupIndex', 'groupIndex']]);
     if (fixtureJso.hasOwnProperty('circle')) {
         fd.shape = new b2CircleShape();
         fd.shape.m_radius = fixtureJso.circle.radius;
@@ -142,20 +132,7 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
     if ( jointJso.type == "revolute" ) {
         var jd = new b2RevoluteJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
-        if ( jointJso.hasOwnProperty('refAngle') )
-            jd.referenceAngle = jointJso.refAngle;
-        if ( jointJso.hasOwnProperty('lowerLimit') )
-            jd.lowerAngle = jointJso.lowerLimit;
-        if ( jointJso.hasOwnProperty('upperLimit') )
-            jd.upperAngle = jointJso.upperLimit;
-        if ( jointJso.hasOwnProperty('maxMotorTorque') )
-            jd.maxMotorTorque = jointJso.maxMotorTorque;
-        if ( jointJso.hasOwnProperty('motorSpeed') )
-            jd.motorSpeed = jointJso.motorSpeed;
-        if ( jointJso.hasOwnProperty('enableLimit') )
-            jd.enableLimit = jointJso.enableLimit;
-        if ( jointJso.hasOwnProperty('enableMotor') )
-            jd.enableMotor = jointJso.enableMotor;
+        applyProperties(jointJso, jd, ['refAngle', 'referenceAngle'], ['lowerLimit', 'lowerAngle'], ['upperLimit', 'upperAngle'], 'maxMotorTorque', 'motorSpeed', 'enableLimit', 'enableMotor');
         joint = world.CreateJoint(jd);
     }
     else if ( jointJso.type == "distance" || jointJso.type == "rope" ) {
@@ -163,33 +140,15 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
             console.log("Replacing unsupported rope joint with distance joint!");
         var jd = new b2DistanceJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
-        if ( jointJso.hasOwnProperty('length') )
-            jd.length = jointJso.length;
-        if ( jointJso.hasOwnProperty('dampingRatio') )
-            jd.dampingRatio = jointJso.dampingRatio;
-        if ( jointJso.hasOwnProperty('frequency') )
-            jd.frequencyHz = jointJso.frequency;
+        applyProperties(jointJso, jd, ['length', 'dampingRatio', ['frequency', 'frequencyHz']]);
         joint = world.CreateJoint(jd);
     }
     else if ( jointJso.type == "prismatic" ) {
         var jd = new b2PrismaticJointDef();
-        loadJointCommonProperties(jd, jointJso, loadedBodies);        
+        loadJointCommonProperties(jd, jointJso, loadedBodies);
         if ( jointJso.hasOwnProperty('localAxisA') )
             jd.localAxisA.SetV( getVectorValue(jointJso.localAxisA) );         
-        if ( jointJso.hasOwnProperty('refAngle') )
-            jd.referenceAngle = jointJso.refAngle;
-        if ( jointJso.hasOwnProperty('enableLimit') )
-            jd.enableLimit = jointJso.enableLimit;
-        if ( jointJso.hasOwnProperty('lowerLimit') )
-            jd.lowerTranslation = jointJso.lowerLimit;
-        if ( jointJso.hasOwnProperty('upperLimit') )
-            jd.upperTranslation = jointJso.upperLimit;
-        if ( jointJso.hasOwnProperty('enableMotor') )
-            jd.enableMotor = jointJso.enableMotor;
-        if ( jointJso.hasOwnProperty('maxMotorForce') )
-            jd.maxMotorForce = jointJso.maxMotorForce;
-        if ( jointJso.hasOwnProperty('motorSpeed') )
-            jd.motorSpeed = jointJso.motorSpeed;            
+        applyProperties(jointJso, jd, [['refAngle', 'referenceAngle'], 'enableLimit', ['lowerLimit', 'lowerTranslation'], ['upperLimit', 'upperTranslation'], 'enableMotor', 'maxMotorForce', 'motorSpeed']);
         joint = world.CreateJoint(jd);
     }
     else if ( jointJso.type == "wheel" ) {
@@ -200,10 +159,7 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
         var jd = new b2DistanceJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
         jd.length = 0.0;
-        if ( jointJso.hasOwnProperty('springDampingRatio') )
-            jd.dampingRatio = jointJso.springDampingRatio;
-        if ( jointJso.hasOwnProperty('springFrequency') )
-            jd.frequencyHz = jointJso.springFrequency;
+        applyProperties(jointJso, jd, [['springDampingRatio', 'dampingRatio'], ['springFrequency', 'frequencyHz']]);
         world.CreateJoint(jd);
         
         jd = new b2LineJointDef();
@@ -216,17 +172,13 @@ function loadJointFromRUBE(jointJso, world, loadedBodies)
     else if ( jointJso.type == "friction" ) {
         var jd = new b2FrictionJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
-        if ( jointJso.hasOwnProperty('maxForce') )
-            jd.maxForce = jointJso.maxForce;
-        if ( jointJso.hasOwnProperty('maxTorque') )
-            jd.maxTorque = jointJso.maxTorque;
+        applyProperties(jointJso, jd, ['maxForce', 'maxTorque']);
         joint = world.CreateJoint(jd);
     }
     else if ( jointJso.type == "weld" ) {
         var jd = new b2WeldJointDef();
         loadJointCommonProperties(jd, jointJso, loadedBodies);
-        if ( jointJso.hasOwnProperty('referenceAngle') )
-            jd.referenceAngle = jointJso.referenceAngle;
+        applyProperties(jointJso, jd, ['referenceAngle']);
         joint = world.CreateJoint(jd);
     }
     else {
@@ -451,14 +403,3 @@ function getCustomProperty(item, propertyType, propertyName, defaultValue) {
     }
     return defaultValue;
 }
-
-
-
-
-
-
-
-
-
-
-
