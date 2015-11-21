@@ -55,7 +55,7 @@ public:
     unsigned short* indices;
 
     b2dJsonImage();
-    ~b2dJsonImage();
+    virtual ~b2dJsonImage();
     b2dJsonImage(const b2dJsonImage* other);
 
     void updateCorners(float aspect);
