@@ -89,6 +89,11 @@ public class Jb2dJson {
 	protected Map<Joint, String> m_jointToNameMap;
 	protected Map<Jb2dJsonImage, String> m_imageToNameMap;
 
+	protected Map<Body, String> m_bodyToPathMap;
+	protected Map<Fixture, String> m_fixtureToPathMap;
+	protected Map<Joint, String> m_jointToPathMap;
+	protected Map<Jb2dJsonImage, String> m_imageToPathMap;
+
 	// This maps an item (Body, Fixture etc) to a set of custom properties.
 	// Use null for world properties.
 	protected Map<Object, Jb2dJsonCustomProperties> m_customPropertiesMap;
@@ -129,6 +134,11 @@ public class Jb2dJson {
 		m_fixtureToNameMap = new HashMap<Fixture, String>();
 		m_jointToNameMap = new HashMap<Joint, String>();
 		m_imageToNameMap = new HashMap<Jb2dJsonImage, String>();
+
+		m_bodyToPathMap = new HashMap<Body, String>();
+		m_fixtureToPathMap = new HashMap<Fixture, String>();
+		m_jointToPathMap = new HashMap<Joint, String>();
+		m_imageToPathMap = new HashMap<Jb2dJsonImage, String>();
 		
 		m_customPropertiesMap = new HashMap<Object, Jb2dJsonCustomProperties>();
 		
@@ -248,6 +258,22 @@ public class Jb2dJson {
 
 	public void setImageName(Jb2dJsonImage image, String name) {
 		m_imageToNameMap.put(image, name);
+	}
+
+	public void setBodyPath(Body body, String path) {
+		m_bodyToPathMap.put(body, path);
+	}
+
+	public void setFixturePath(Fixture fixture, String path) {
+		m_fixtureToPathMap.put(fixture, path);
+	}
+
+	public void setJointPath(Joint joint, String path) {
+		m_jointToPathMap.put(joint, path);
+	}
+
+	public void setImagePath(Jb2dJsonImage image, String path) {
+		m_imageToPathMap.put(image, path);
 	}
 
 	public JSONObject b2j(Body body) throws JSONException {
@@ -681,6 +707,22 @@ public class Jb2dJson {
 		return m_imageToNameMap.get(image);
 	}
 
+	public String getBodyPath(Body body) {
+		return m_bodyToPathMap.get(body);
+	}
+
+	public String getFixturePath(Fixture fixture) {
+		return m_fixtureToPathMap.get(fixture);
+	}
+
+	public String getJointPath(Joint joint) {
+		return m_jointToPathMap.get(joint);
+	}
+
+	public String getImagePath(Jb2dJsonImage image) {
+		return m_imageToPathMap.get(image);
+	}
+
 	public String floatToHex(float f) {
 		int bits = Float.floatToIntBits(f);
 		return Integer.toHexString(bits);
@@ -791,6 +833,11 @@ public class Jb2dJson {
 		m_fixtureToNameMap.clear();
 		m_jointToNameMap.clear();
 		m_imageToNameMap.clear();
+
+		m_bodyToPathMap.clear();
+		m_fixtureToPathMap.clear();
+		m_jointToPathMap.clear();
+		m_imageToPathMap.clear();
 	}
 
 	// Pass null for existingWorld to create a new world
@@ -941,6 +988,10 @@ public class Jb2dJson {
 		if ("" != bodyName)
 			setBodyName(body, bodyName);
 
+		String bodyPath = bodyValue.optString("path", "");
+		if ("" != bodyPath)
+			setBodyPath(body, bodyPath);
+
 		int i = 0;
 		JSONArray fixtureValues = bodyValue.optJSONArray("fixture");
 		if (null != fixtureValues) {
@@ -1053,6 +1104,11 @@ public class Jb2dJson {
 		String fixtureName = fixtureValue.optString("name", "");
 		if (fixtureName != "") {
 			setFixtureName(fixture, fixtureName);
+		}
+
+		String fixturePath = fixtureValue.optString("path", "");
+		if (fixturePath != "") {
+			setFixturePath(fixture, fixturePath);
 		}
 
 		return fixture;
@@ -1199,6 +1255,11 @@ public class Jb2dJson {
 			if (!jointName.equals("")) {
 				setJointName(joint, jointName);
 			}
+
+			String jointPath = jointValue.optString("path", "");
+			if (!jointPath.equals("")) {
+				setJointPath(joint, jointPath);
+			}
 		}
 
 		return joint;
@@ -1215,6 +1276,12 @@ public class Jb2dJson {
 		if (!imageName.equals("")) {
 			img.name = imageName;
 			setImageName(img, imageName);
+		}
+
+		String imagePath = imageValue.optString("path", "");
+		if (!imagePath.equals("")) {
+			img.path = imagePath;
+			setImagePath(img, imagePath);
 		}
 
 		String fileName = imageValue.optString("file", "");
@@ -1387,6 +1454,46 @@ public class Jb2dJson {
 		return keys.toArray(new Jb2dJsonImage[0]);
 	}
 
+	public Body[] getBodiesByPath(String path) {
+		Set<Body> keys = new HashSet<Body>();
+		for (Entry<Body, String> entry : m_bodyToPathMap.entrySet()) {
+			if (path.equals(entry.getValue())) {
+				keys.add(entry.getKey());
+			}
+		}
+		return keys.toArray(new Body[0]);
+	}
+
+	public Fixture[] getFixturesByPath(String path) {
+		Set<Fixture> keys = new HashSet<Fixture>();
+		for (Entry<Fixture, String> entry : m_fixtureToPathMap.entrySet()) {
+			if (path.equals(entry.getValue())) {
+				keys.add(entry.getKey());
+			}
+		}
+		return keys.toArray(new Fixture[0]);
+	}
+
+	public Joint[] getJointsByPath(String path) {
+		Set<Joint> keys = new HashSet<Joint>();
+		for (Entry<Joint, String> entry : m_jointToPathMap.entrySet()) {
+			if (path.equals(entry.getValue())) {
+				keys.add(entry.getKey());
+			}
+		}
+		return keys.toArray(new Joint[0]);
+	}
+
+	public Jb2dJsonImage[] getImagesByPath(String path) {
+		Set<Jb2dJsonImage> keys = new HashSet<Jb2dJsonImage>();
+		for (Entry<Jb2dJsonImage, String> entry : m_imageToPathMap.entrySet()) {
+			if (path.equals(entry.getValue())) {
+				keys.add(entry.getKey());
+			}
+		}
+		return keys.toArray(new Jb2dJsonImage[0]);
+	}
+
 	public Jb2dJsonImage[] getAllImages() {
 		return (Jb2dJsonImage[]) m_images.toArray();
 	}
@@ -1422,6 +1529,50 @@ public class Jb2dJson {
 		for (Entry<Jb2dJsonImage, String> entry : m_imageToNameMap.entrySet()) {
 			if (name.equals(entry.getValue())) {
 				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
+	public Body getBodyByPathAndName(String path, String name) {
+		for (Entry<Body, String> entry : m_bodyToNameMap.entrySet()) {
+			if (name.equals(entry.getValue())) {
+				Body b = entry.getKey();
+				if ( path.equals(getBodyPath(b)) )
+					return b;
+			}
+		}
+		return null;
+	}
+
+	public Fixture getFixtureByPathAndName(String path, String name) {
+		for (Entry<Fixture, String> entry : m_fixtureToNameMap.entrySet()) {
+			if (name.equals(entry.getValue())) {
+				Fixture f = entry.getKey();
+				if ( path.equals(getFixturePath(f)) )
+					return f;
+			}
+		}
+		return null;
+	}
+
+	public Joint getJointByPathAndName(String path, String name) {
+		for (Entry<Joint, String> entry : m_jointToNameMap.entrySet()) {
+			if (name.equals(entry.getValue())) {
+				Joint j = entry.getKey();
+				if ( path.equals(getJointPath(j)) )
+					return j;
+			}
+		}
+		return null;
+	}
+
+	public Jb2dJsonImage getImageByPathAndName(String path, String name) {
+		for (Entry<Jb2dJsonImage, String> entry : m_imageToNameMap.entrySet()) {
+			if (name.equals(entry.getValue())) {
+				Jb2dJsonImage i = entry.getKey();
+				if ( path.equals(getImagePath(i)) )
+					return i;
 			}
 		}
 		return null;

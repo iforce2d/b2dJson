@@ -43,6 +43,7 @@ import org.json.*;
 public class Jb2dJsonImage {
 
     String name;
+    String path;
     String file;
     Body body;
     Vec2 center;
