@@ -985,11 +985,11 @@ public class Jb2dJson {
 		Body body = world.createBody(bodyDef);
 
 		String bodyName = bodyValue.optString("name", "");
-		if ("" != bodyName)
+		if (!"".equals(bodyName))
 			setBodyName(body, bodyName);
 
 		String bodyPath = bodyValue.optString("path", "");
-		if ("" != bodyPath)
+		if (!"".equals(bodyPath))
 			setBodyPath(body, bodyPath);
 
 		int i = 0;
@@ -1102,12 +1102,12 @@ public class Jb2dJson {
 		}
 
 		String fixtureName = fixtureValue.optString("name", "");
-		if (fixtureName != "") {
+		if (!fixtureName.equals("")) {
 			setFixtureName(fixture, fixtureName);
 		}
 
 		String fixturePath = fixtureValue.optString("path", "");
-		if (fixturePath != "") {
+		if (!fixturePath.equals("")) {
 			setFixturePath(fixture, fixturePath);
 		}
 
