@@ -126,9 +126,6 @@ public:
     b2Joint* j2b2Joint(b2World* world, Json::Value& jointValue);
     b2dJsonImage* j2b2dJsonImage(Json::Value& imageValue);
     
-    //function copies json world into existing world
-    bool j2Intob2World(b2World *world, Json::Value& worldValue);
-
     int getBodiesByName(std::string name, std::vector<b2Body*>& bodies);
     int getFixturesByName(std::string name, std::vector<b2Fixture*>& fixtures);
     int getJointsByName(std::string name, std::vector<b2Joint*>& joints);
