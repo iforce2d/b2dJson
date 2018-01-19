@@ -434,6 +434,7 @@ Json::Value b2dJson::b2j(b2Joint* joint)
 
             b2MotorJoint* motorJoint = (b2MotorJoint*)joint;
             vecToJson("linearOffset", motorJoint->GetLinearOffset(), jointValue);
+            vecToJson("anchorA", motorJoint->GetLinearOffset(), jointValue);
             floatToJson("refAngle", motorJoint->GetAngularOffset(), jointValue);
             floatToJson("maxForce", motorJoint->GetMaxForce(), jointValue);
             floatToJson("maxTorque", motorJoint->GetMaxTorque(), jointValue);
