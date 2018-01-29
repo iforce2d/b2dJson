@@ -1721,7 +1721,7 @@ int b2dJson::getAllBodies(std::vector<b2Body*>& bodies)
 
 int b2dJson::getAllFixtures(std::vector<b2Fixture *> &fixtures)
 {
-    for (int i = 0; i < m_bodies.size(); i++) {
+    for (unsigned int i = 0; i < m_bodies.size(); i++) {
         for (b2Fixture* f = m_bodies[i]->GetFixtureList(); f; f = f->GetNext())
             fixtures.push_back(f);
     }
