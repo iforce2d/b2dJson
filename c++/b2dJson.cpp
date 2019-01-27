@@ -288,7 +288,7 @@ Json::Value b2dJson::b2j(b2Fixture *fixture)
     case b2Shape::e_polygon:
         {
             b2PolygonShape* poly = (b2PolygonShape*)shape;
-            int32 vertexCount = poly->GetVertexCount();
+            int32 vertexCount = poly->m_vertices->Length();
             b2Assert(vertexCount <= b2_maxPolygonVertices);
             for (int32 i = 0; i < vertexCount; ++i)
                 vecToJson("vertices", poly->m_vertices[i], fixtureValue["polygon"], i);
