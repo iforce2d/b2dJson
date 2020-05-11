@@ -1039,12 +1039,26 @@ b2World* b2dJson::j2b2World(Json::Value& worldValue, b2World* world)
 
     if ( ! world )
         world = new b2World( jsonToVec("gravity", worldValue) );
-    world->SetAllowSleeping( worldValue["allowSleep"].asBool() );
 
-    world->SetAutoClearForces( worldValue["autoClearForces"].asBool() );
-    world->SetWarmStarting( worldValue["warmStarting"].asBool() );
-    world->SetContinuousPhysics( worldValue["continuousPhysics"].asBool() );
-    world->SetSubStepping( worldValue["subStepping"].asBool() );
+    Json::Value allowSleep = worldValue["allowSleep"];
+    if ( !allowSleep.isNull() )
+        world->SetAllowSleeping( allowSleep.asBool() );
+
+    Json::Value autoClearForces = worldValue["autoClearForces"];
+    if ( !autoClearForces.isNull() )
+        world->SetAutoClearForces( autoClearForces.asBool() );
+
+    Json::Value warmStarting = worldValue["warmStarting"];
+    if ( !warmStarting.isNull() )
+        world->SetWarmStarting( warmStarting.asBool() );
+
+    Json::Value continuousPhysics = worldValue["continuousPhysics"];
+    if ( !continuousPhysics.isNull())
+        world->SetContinuousPhysics( continuousPhysics.asBool() );
+
+    Json::Value subStepping = worldValue["subStepping"];
+    if ( !subStepping.isNull() )
+        world->SetSubStepping( subStepping.asBool() );
 
     readCustomPropertiesFromJson(world, worldValue);
 
